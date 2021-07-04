@@ -42,12 +42,12 @@ class Sensor(GameObject, Observer, Observable):
             ray_end_x, ray_end_y = self._ray.translate(ray_end_x, ray_end_y)  # Перевести относительные коррдинаты
             # конца луча в абсолютные
             self._ray.look_at(ray_end_x, ray_end_y)  # Перенести конец луча в новую точку
-            distance = self.get_distance(obstacles)  # Получить дистанцию до объекта
+            distance = self._get_distance(obstacles)  # Получить дистанцию до объекта
             view.append(distance)  # Записать данные
             angle += Sensor.DEFAULT_ANGLE_STEP_RAD
         return view
 
-    def get_distance(self, obstacles: Any) -> Any:  # Определить расстояние до точки пересечения
+    def _get_distance(self, obstacles: Any) -> Any:  # Определить расстояние до точки пересечения
         closest = Sensor.MAX_RAY_LEN
         points = [self._ray.cast(*obstacle.get_coord()) for obstacle in obstacles]
         distances = [self._ray.get_distance(*point) for point in points if point]
@@ -56,16 +56,16 @@ class Sensor(GameObject, Observer, Observable):
         else:
             return closest
 
-    def update(self, x: Any, y: Any, orientation: Any) -> None:
+    def update(self, x: float, y: float, orientation: float) -> None:
         self._x = x
         self._y = y
         self._orientation = orientation
-        self.upd_ray_limits()
+        self._upd_ray_limits()
         self._notify()
 
-    def upd_ray_limits(self) -> None:
-        self._left_limit = math.radians(self._orientation + Sensor.AOV / 2)
-        self._right_limit = math.radians(self._orientation - Sensor.AOV / 2)
+    def _upd_ray_limits(self) -> None:
+        self._left_limit = self._orientation + math.radians(Sensor.AOV / 2)
+        self._right_limit = self._orientation - math.radians(Sensor.AOV / 2)
 
     def show(self, surface):  # Отрисовка поля зрения сенсора
         x_r = math.sin(self._right_limit) * Sensor.MAX_RAY_LEN
