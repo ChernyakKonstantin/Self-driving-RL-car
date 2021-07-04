@@ -1,114 +1,124 @@
 import math
+from typing import Any
+
 import pygame
 
-import ray
+from abstract_classes import GameObject, Observer, Observable
+from ray import Ray
 
-class Sensor:
-    def __init__(self, aov, max_ray_len, x, y, orientation):
-        self.aov = aov #Угол обзора в градусах
-        self.angle_step_degree = 4
-        self.angle_step = math.radians(self.angle_step_degree) #Шаг поворота датчика равен 1 градус
-                                          #в радианах
-        self.pos_x = x
-        self.pos_y = y        
-        self.max_ray_len = max_ray_len #Максимальная дальность луча
-        self.ray = ray.Ray(self.pos_x, self.pos_y, self.max_ray_len)
-        self.orientation = orientation #Направление центра
-        self.left_limit = math.radians(self.orientation + self.aov / 2) #Крайнее левое
-                                                                        #значение угла
-        self.right_limit = math.radians(self.orientation - self.aov / 2) #Крайнее правое
-                                                                         #значение угла
-                                                                         
-    def get_view(self, obstacles): #Получить с сенсора данные об окружении
-        view = [] #Карта мира
-        angle = self.right_limit #Начальный угол
-        for cur_angle in range(0, self.aov, self.angle_step_degree): 
-            ray_end_x = math.sin(angle) * self.max_ray_len #Получить относительные
-            ray_end_y = math.cos(angle) * self.max_ray_len #координаты конца луча     
-            ray_end_x, ray_end_y = self.ray.translate(ray_end_x, ray_end_y) # Перевести относительные коррдинаты
-                                                                            # конца луча в абсолютные
-            self.ray.look_at(ray_end_x, ray_end_y) #Перенести конец луча в новую точку
-            distance = self.get_distance(obstacles) #Получить дистанцию до объекта          
-            view.append(distance) #Записать данные
-            angle += self.angle_step
+
+class Sensor(GameObject, Observer, Observable):
+    DEFAULT_ANGLE_STEP_DEGREE = 4
+    DEFAULT_ANGLE_STEP_RAD = math.radians(DEFAULT_ANGLE_STEP_DEGREE)
+    AOV = 120  # Угол обзора сенсора, градусы
+    MAX_RAY_LEN = 200  # Дальность луча, см
+
+    RED = (255, 0, 0)
+    GREEN = (0, 255, 0)
+    WHITE = (255, 255, 255)
+    YELLOW = (255, 255, 100)
+    PURPLE = (150, 50, 150)
+
+    def __init__(self, x: Any, y: Any, orientation: Any):
+        super(Sensor, self).__init__()
+        self._x = x
+        self._y = y
+        self._ray = Ray(self._x, self._y, Sensor.MAX_RAY_LEN)
+        self._orientation = orientation  # Направление центра
+        self._left_limit = math.radians(self._orientation + Sensor.AOV / 2)
+        self._right_limit = math.radians(self._orientation - Sensor.AOV / 2)
+        self._attach(self._ray)
+
+    def _notify(self):
+        for observer in self._observers:
+            observer.update(self._x, self._y)
+
+    def get_view(self, obstacles: Any) -> Any:  # Получить с сенсора данные об окружении
+        view = []  # Карта мира
+        angle = self._right_limit  # Начальный угол
+        for _ in range(0, Sensor.AOV, Sensor.DEFAULT_ANGLE_STEP_DEGREE):
+            ray_end_x = math.sin(angle) * Sensor.MAX_RAY_LEN  # Получить относительные
+            ray_end_y = math.cos(angle) * Sensor.MAX_RAY_LEN  # координаты конца луча
+            ray_end_x, ray_end_y = self._ray.translate(ray_end_x, ray_end_y)  # Перевести относительные коррдинаты
+            # конца луча в абсолютные
+            self._ray.look_at(ray_end_x, ray_end_y)  # Перенести конец луча в новую точку
+            distance = self.get_distance(obstacles)  # Получить дистанцию до объекта
+            view.append(distance)  # Записать данные
+            angle += Sensor.DEFAULT_ANGLE_STEP_RAD
         return view
-            
-    def get_distance(self, obstacles): #Определить расстояние до точки пересечения
-        closest = self.max_ray_len 
-        record = self.max_ray_len #Максимально возможное для регистрации 
-                                  #расстояние до точки пересечения
-                                  
-        for obstacle in obstacles: #Перебрать все границы препятсвий
-            pt = self.ray.cast(obstacle) #Найти точку пересечения с границей
-                                         #препятствия
-            if pt: #Если такая точка существует
-                distance = self.ray.get_distance() #Найти расстояние до нее
-                if distance <= record:
-                    record = distance
-                    closest = record
-        return closest
-    
-    def upd_pos(self, x, y):
-         self.pos_x = x
-         self.pos_y = y
-         self.ray.upd_sourse_coord(self.pos_x, self.pos_y)
-    
-    def upd_ray_limits(self, delta):
-        self.left_limit += delta
-        self.right_limit += delta
-        
-    def show(self, surface): #Отрисовка поля зрения сенсора
-        x_r = math.sin(self.right_limit) * self.max_ray_len
-        y_r = math.cos(self.right_limit) * self.max_ray_len
-        
-        coord_r = self.ray.translate(x_r, y_r) #координаты конца правой грани
-        
-        x_l = math.sin(self.left_limit) * self.max_ray_len
-        y_l = math.cos(self.left_limit) * self.max_ray_len
-        
-        coord_l = self.ray.translate(x_l, y_l) #координаты конца правой грани
-        
-        x_c = math.sin(self.orientation) * self.max_ray_len
-        y_c = math.cos(self.orientation) * self.max_ray_len
-        
-        coord_c = self.ray.translate(x_c, y_c)
-        
-        coord_30 = self.ray.translate(math.sin(self.orientation - math.radians(30)) * self.max_ray_len, 
-                                       math.cos(self.orientation - math.radians(30)) * self.max_ray_len)
-        
-        coord_90 = self.ray.translate(math.sin(self.orientation + math.radians(30)) * self.max_ray_len, 
-                                       math.cos(self.orientation + math.radians(30)) * self.max_ray_len)
-        
-        pygame.draw.line(surface, 
-                        (255,0,0), #Red color
-                        (self.pos_x, self.pos_y),
-                        coord_r)
-        
-        pygame.draw.line(surface, 
-                             (0,255,0), #Green color
-                             (self.pos_x, self.pos_y),
-                             coord_l)
-        
-        pygame.draw.line(surface, 
-                             (255,255,255), #White color
-                             (self.pos_x, self.pos_y),
-                             coord_c)
-        
-        pygame.draw.line(surface, 
-                             (255,255,100), #Yellow color
-                             (self.pos_x, self.pos_y),
-                             coord_30)
-        
-        pygame.draw.line(surface, 
-                             (150,50,150), #Purple color
-                             (self.pos_x, self.pos_y),
-                             coord_90)
-        
+
+    def get_distance(self, obstacles: Any) -> Any:  # Определить расстояние до точки пересечения
+        closest = Sensor.MAX_RAY_LEN
+        points = [self._ray.cast(*obstacle.get_coord()) for obstacle in obstacles]
+        distances = [self._ray.get_distance(*point) for point in points if point]
+        if distances:
+            return min(distances)
+        else:
+            return closest
+
+    def update(self, x: Any, y: Any, orientation: Any) -> None:
+        self._x = x
+        self._y = y
+        self._orientation = orientation
+        self.upd_ray_limits()
+        self._notify()
+
+    def upd_ray_limits(self) -> None:
+        self._left_limit = math.radians(self._orientation + Sensor.AOV / 2)
+        self._right_limit = math.radians(self._orientation - Sensor.AOV / 2)
+
+    def show(self, surface):  # Отрисовка поля зрения сенсора
+        x_r = math.sin(self._right_limit) * Sensor.MAX_RAY_LEN
+        y_r = math.cos(self._right_limit) * Sensor.MAX_RAY_LEN
+
+        coord_r = self._ray.translate(x_r, y_r)  # координаты конца правой грани
+
+        x_l = math.sin(self._left_limit) * Sensor.MAX_RAY_LEN
+        y_l = math.cos(self._left_limit) * Sensor.MAX_RAY_LEN
+
+        coord_l = self._ray.translate(x_l, y_l)  # координаты конца правой грани
+
+        x_c = math.sin(self._orientation) * Sensor.MAX_RAY_LEN
+        y_c = math.cos(self._orientation) * Sensor.MAX_RAY_LEN
+
+        coord_c = self._ray.translate(x_c, y_c)
+
+        coord_30 = self._ray.translate(math.sin(self._orientation - math.radians(30)) * Sensor.MAX_RAY_LEN,
+                                       math.cos(self._orientation - math.radians(30)) * Sensor.MAX_RAY_LEN)
+
+        coord_90 = self._ray.translate(math.sin(self._orientation + math.radians(30)) * Sensor.MAX_RAY_LEN,
+                                       math.cos(self._orientation + math.radians(30)) * Sensor.MAX_RAY_LEN)
+
+        pygame.draw.line(surface,
+                         Sensor.RED,
+                         (self._x, self._y),
+                         coord_r)
+
+        pygame.draw.line(surface,
+                         Sensor.GREEN,
+                         (self._x, self._y),
+                         coord_l)
+
+        pygame.draw.line(surface,
+                         Sensor.WHITE,
+                         (self._x, self._y),
+                         coord_c)
+
+        pygame.draw.line(surface,
+                         Sensor.YELLOW,
+                         (self._x, self._y),
+                         coord_30)
+
+        pygame.draw.line(surface,
+                         Sensor.PURPLE,
+                         (self._x, self._y),
+                         coord_90)
+
         pygame.draw.arc(surface,
-                        (255,0,0),
-                        pygame.Rect(self.pos_x - self.max_ray_len, 
-                                    self.pos_y - self.max_ray_len, 
-                                    self.max_ray_len * 2, 
-                                    self.max_ray_len * 2),
-                        self.orientation - math.radians(self.aov/2) - math.radians(90),
-                        self.orientation + math.radians(self.aov/2) - math.radians(90))
+                        (255, 0, 0),
+                        pygame.Rect(self._x - Sensor.MAX_RAY_LEN,
+                                    self._y - Sensor.MAX_RAY_LEN,
+                                    Sensor.MAX_RAY_LEN * 2,
+                                    Sensor.MAX_RAY_LEN * 2),
+                        self._orientation - math.radians(Sensor.AOV / 2) - math.radians(90),
+                        self._orientation + math.radians(Sensor.AOV / 2) - math.radians(90))

@@ -1,78 +1,69 @@
-import pygame
 import math
+from typing import Any, Union
+
+from abstract_classes import GameObject, Observer
 
 
-class Ray: #Класс луча
-    def __init__(self, x, y, max_ray_len):
-        self.sourse_pos = [x,y] #Координаты источника луча
+class Ray(GameObject, Observer):  # Класс луча
+    WHITE = (255, 255, 255)
+
+    def __init__(self, x: Any, y: Any, max_ray_len: Any) -> None:
+        self._x = x
+        self._y = y
         self.max_ray_len = max_ray_len
-        self.end_pos = [None,None] #Координаты конечной точки луча
-        self.intersection_pt = [None, None] #Координаты точки пересечения с препятствием      
-    
-    def translate(self, x, y):         #Переводит относительные от источника 
-        new_x = self.sourse_pos[0] + x  #луча координаты в абсолютные
-        new_y = self.sourse_pos[1] + y
-        return new_x, new_y
-    
-    def cast(self, line): #Если луч пересекает объект, возвращает координаты 
-                          #точки пересечения, в противном случае None
-                          #Википедия: пересечение прямых
-        x1 = line.a[0] #x coord of a of the line
-        y1 = line.a[1] #y coord of a of the line 
-        x2 = line.b[0] #x coord of b of the line
-        y2 = line.b[1] #y coord of b of the line
-        
-        x3 = self.sourse_pos[0] #x coord of the ray sourse
-        y3 = self.sourse_pos[1] #y coord of the ray sourse
-        x4 = self.end_pos[0] #x coord of the ray end
-        y4 = self.end_pos[1] #y coord of the ray end
-        
-        den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4) 
-        if den == 0: return None
-    
-        t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den
+        # Координаты конечной точки луча
+        self._x_end = None
+        self._y_end = None
+        # Координаты точки пересечения с препятствием
+        self._intersection_x = None
+        self._intersection_y = None
 
-        if (t > 0 and t < 1):
+    def translate(self, x: Any, y: Any) -> Any:
+        # Переводит относительные от источника луча координаты в абсолютные
+        new_x = self._x + x
+        new_y = self._y + y
+        return new_x, new_y
+
+    def cast(self, x1: Any, y1: Any, x2: Any, y2: Any) -> Union[Any, None]:
+        """
+        Если луч пересекает объект, возвращает координаты точки пересечения,
+        в противном случае None
+        """
+        den = (x1 - x2) * (self._y - self._y_end) - (y1 - y2) * (self._x - self._x_end)
+        if den == 0:
+            return None
+
+        t = ((x1 - self._x) * (self._y - self._y_end) - (y1 - self._y) * (self._x - self._x_end)) / den
+
+        if 0 < t < 1:
             x = x1 + t * (x2 - x1)
             y = y1 + t * (y2 - y1)
             x = int(x)
             y = int(y)
-            if (x < self.sourse_pos[0] and x > self.end_pos[0]) or (x > self.sourse_pos[0] and x < self.end_pos[0]): #Проверка, что точка
-                                                                                                                     #пересечения находится
-                                                                                                                     #по направлению взгяда
-                self.intersection_pt = x,y
-                return x,y
-            else: 
+            # Проверка, что точка пересечения находится по направлению взгяда
+            if self._x > x > self._x_end or self._x < x < self._x_end:
+                self._intersection_x = x
+                self._intersection_y = y
+                return x, y
+            else:
                 return None
         else:
-            self.intersection_pt = None
-            return None 
-        
-    def look_at(self, x, y): #Переместить конец луча
-        self.end_pos[0] = x 
-        self.end_pos[1] = y
-        
-    def upd_sourse_coord(self, x, y): #Обновить координаты источника луча
-        self.sourse_pos[0] = x
-        self.sourse_pos[1] = y
-    
-    def get_distance(self):  #Дистанция до точки пересечения
-        x = self.intersection_pt[0] - self.sourse_pos[0]
-        y = self.intersection_pt[1] - self.sourse_pos[1]
-        return math.sqrt(pow(x,2) + pow(y,2))
-    
-    def show(self,surface): #Отрисовать луч
-        WHITE = (255,255,255)
-        if self.intersection_pt and self.get_distance() <= self.max_ray_len: # Отрисовать луч до точки пересечения,
-                                                                             # если такая существует и находится
-                                                                             # в пределах дальности луча
-            pygame.draw.line(surface, 
-                         WHITE,
-                         self.sourse_pos,
-                         self.intersection_pt)
-        else: #Иначе отрисовать до конечной точки луча
-            pygame.draw.line(surface, 
-                             (255,255,255), #White color
-                             self.sourse_pos,
-                             self.end_pos)
-    
+            self._intersection_x = None
+            self._intersection_y = None
+            return None
+
+    def look_at(self, x: Any, y: Any) -> None:
+        self._x_end = x
+        self._y_end = y
+
+    def update(self, x: Any, y: Any) -> None:
+        self._x = x
+        self._y = y
+
+    def get_distance(self, _intersection_x: Any, _intersection_y: Any) -> Any:
+        x = _intersection_x - self._x
+        y = _intersection_y - self._y
+        return math.sqrt(pow(x, 2) + pow(y, 2))
+
+    def show(self, surface: Any) -> None:
+        raise NotImplementedError
