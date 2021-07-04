@@ -1,7 +1,7 @@
 import pygame
 
 import environment_new
-import radar
+from radar import RadarView
 
 env = environment_new.Environment()
 
@@ -15,7 +15,7 @@ FPS = 30
 fpsClock = pygame.time.Clock()
 
 view = env.reset()
-
+radar = RadarView()
 is_done = False
 total_reward = 0.0
 while not is_done:
