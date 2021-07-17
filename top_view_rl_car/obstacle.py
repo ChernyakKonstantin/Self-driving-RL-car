@@ -32,22 +32,22 @@ class Line(GameObject):
     """ Класс линий, из которых состоит препятствие."""
 
     def __init__(self, x1, y1, x2, y2):
-        self._a = Point(x1, y1)
-        self._b = Point(x2, y2)
+        self._start_point = Point(x1, y1)
+        self._end_point = Point(x2, y2)
 
     def shifted_copy(self, shift: Any) -> Any:
-        a = self._a.x + shift, self._a.y
-        b = self._b.x + shift, self._b.y
+        a = self._start_point.x + shift, self._start_point.y
+        b = self._end_point.x + shift, self._end_point.y
         return Line(*a, *b)
 
     def show(self, surface):
         pygame.draw.line(surface,
                          Line.WHITE,
-                         (self._a.x, self._a.y),
-                         (self._b.x, self._b.y))
+                         (self._start_point.x, self._start_point.y),
+                         (self._end_point.x, self._end_point.y))
 
     def get_coord(self) -> Tuple:
-        return self._a.x, self._a.y, self._b.x, self._b.y
+        return self._start_point.x, self._start_point.y, self._end_point.x, self._end_point.y
 
 
 class Obstacle(GameObject):

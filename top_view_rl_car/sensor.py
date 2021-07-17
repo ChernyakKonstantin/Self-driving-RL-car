@@ -1,3 +1,9 @@
+# Проверить все линии для правой границы сенсора. Если нет пересечений - исключить все правые стенки
+# Если пересечения есть - найти минимальную по Y точку пересечения. Исключить правые стенки с Y < найденный Y. Исключить стенки с Y > найденный Y + MAX_RAY_LEN
+# Проверить все линии для левой границы сенсора. Если нет пересечений - исключить все левые стенки
+# Если пересечения есть - найти минимальную по Y точку пересечения. Исключить левые стенки с Y < найденный Y. Исключить стенки с Y > найденный Y + MAX_RAY_LEN
+
+
 import math
 from typing import Any
 
@@ -44,13 +50,29 @@ class Sensor(GameObject, Observer, Observable):
         else:
             return Sensor._MAX_RAY_LEN
 
+    def _get_ray_y_min_max(self):
+        end_points = []
+        for angle in range(0, Sensor._AOV, Sensor._DEFAULT_ANGLE_STEP_DEGREE):
+            end_points.append(math.cos(self._right_limit + math.radians(angle)) * Sensor._MAX_RAY_LEN)
+        return min(end_points), max(end_points)
+
+    def filter_obstacles(self, obstacles: list) -> list:
+        """Метод фильтрации препятствий, которые не попадут в поле видимости."""
+        ray_end_y_min, ray_end_y_max = self._get_ray_y_min_max()
+        ray_y_min = min([ray_end_y_min, self._ray._y])
+        ray_y_max = max([ray_end_y_max, self._ray._y])
+        # Множество линий, для которых конец < y _min
+        obstacles_above_vision_field = set(obs for obs in obstacles if obs._end_point.y < ray_y_min)
+        # Множество линий, для которых начало > y_max
+        obstacles_below_vision_field = set(obs for obs in obstacles if obs._start_point.y > ray_y_max)
+        return list(set(obstacles) - obstacles_above_vision_field - obstacles_below_vision_field)
+
     def get_view(self, obstacles: list) -> list:  # Получить с сенсора данные об окружении
         view = []  # Карта мира
-        angle = self._right_limit  # Начальный угол
-        for _ in range(0, Sensor._AOV, Sensor._DEFAULT_ANGLE_STEP_DEGREE):
+        for angle in range(0, Sensor._AOV, Sensor._DEFAULT_ANGLE_STEP_DEGREE):
             # Получить относительные координаты конца луча
-            ray_end_x = math.sin(angle) * Sensor._MAX_RAY_LEN
-            ray_end_y = math.cos(angle) * Sensor._MAX_RAY_LEN
+            ray_end_x = math.sin(self._right_limit + math.radians(angle)) * Sensor._MAX_RAY_LEN
+            ray_end_y = math.cos(self._right_limit + math.radians(angle)) * Sensor._MAX_RAY_LEN
             # Получить абсолютные координаты конца луча
             ray_end_x, ray_end_y = self._ray.translate(ray_end_x, ray_end_y)
             # Перенести конец луча в новую точку
@@ -58,7 +80,6 @@ class Sensor(GameObject, Observer, Observable):
             # Получить дистанцию до объекта
             distance = self._get_distance(obstacles)
             view.append(distance)
-            angle += Sensor._DEFAULT_ANGLE_STEP_RAD
         return view
 
     def _upd_ray_limits(self) -> None:
