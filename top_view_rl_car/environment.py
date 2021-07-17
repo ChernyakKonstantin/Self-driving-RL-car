@@ -6,11 +6,11 @@ from typing import Tuple
 import numpy as np
 import pygame
 
-from action_detector import ActionDetector
-from car import Car
-from colors import Colors
-from obstacle import Line
-from sensor import Sensor
+from .action_detector import ActionDetector
+from .car import Car
+from .colors import Colors
+from .obstacle import Line
+from .sensor import Sensor
 
 
 class Environment:

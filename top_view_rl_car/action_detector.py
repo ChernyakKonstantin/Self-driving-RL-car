@@ -1,4 +1,4 @@
-from abstract_classes import Observer
+from .abstract_classes import Observer
 
 
 class ActionDetector(Observer):
