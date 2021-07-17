@@ -1,22 +1,25 @@
 # TODO Придумать нормальную генерацию уровней
 # TODO Реализовать бесконечный уровень
-
 import random
 from typing import Tuple
-from colors import Colors
+
 import numpy as np
+import pygame
 
 from action_detector import ActionDetector
 from car import Car
+from colors import Colors
 from obstacle import Line
+from sensor import Sensor
 
 
 class Environment:
     # Размеры мира
     _WORLD_LENGTH = 650
-    _WORLD_LENGTH = 300
+    _WORLD_WIDTH = 300
+    _SURFACE_SIZE = _WORLD_WIDTH + 50, _WORLD_LENGTH + 50
     # Начальное положение объекта управления
-    _INIT_CAR_X = _WORLD_LENGTH / 2
+    _INIT_CAR_X = _WORLD_WIDTH / 2
     _INIT_CAR_Y = 10
     # Параметры трассы
     _ROAD_WIDTH = 50
@@ -25,10 +28,14 @@ class Environment:
     _WALL_X_SHIFT = 15
     _WALL_Y_SHIFT = 30
     # Параметры завершения эпизода
-    _NO_ACTION_LIMIT = 10
+    _NO_ACTION_LIMIT = 3
     _MIN_DISTANCE_TO_OBSTACLE = 5
     # Параметры награды
     LOOSE_REWARD = -130
+
+    @staticmethod
+    def get_observation_shape():
+        return Sensor.get_observation_shape()
 
     @property
     def actions(self) -> dict:
@@ -41,12 +48,7 @@ class Environment:
         """
         self._n_steps = n_steps
 
-        self.car = Car(Environment._INIT_CAR_X, Environment._INIT_CAR_Y)
-        self.walls = []
-        self._generate_world()
-        self.car_prev_pos = Environment._INIT_CAR_Y
-        self.observation = None
-        self.next_observation = None
+        self._initialize()
 
         self._actions = {
             0: [],  # Ехать по инерции
@@ -58,8 +60,19 @@ class Environment:
             6: [3],  # Затормозить
         }
 
+        pygame.init()
+        self._surface = pygame.display.set_mode(Environment._SURFACE_SIZE)
+
+    def _initialize(self):
+        self.car = Car(Environment._INIT_CAR_X, Environment._INIT_CAR_Y)
         self._action_detector = ActionDetector(limit=Environment._NO_ACTION_LIMIT)
         self.car._attach(self._action_detector)
+
+        self.walls = []
+        self._generate_world()
+        self.car_prev_pos = Environment._INIT_CAR_Y
+        self.observation = None
+        self.next_observation = None
 
     def _generate_world(self) -> None:
         first_point = (Environment._START_WALL_X, Environment._START_WALL_Y)
@@ -84,8 +97,8 @@ class Environment:
     def _get_observation(self) -> list:
         return self.car.sensor.get_view(self.walls)
 
-    def _check_collision(self, observation: list) -> bool:
-        if min(observation) > Environment._MIN_DISTANCE_TO_OBSTACLE:
+    def _collided(self, observation: list) -> bool:
+        if min(observation) < Environment._MIN_DISTANCE_TO_OBSTACLE:
             return True
         else:
             return False
@@ -98,11 +111,11 @@ class Environment:
     def _step(self, action) -> Tuple[list, float, bool, None]:
         """Метод однократного совершения действия."""
         self.observation = self.next_observation
-        if self._check_collision(self.observation):
+        if not self._collided(self.observation):
             self.car.move(action)
             self.next_observation = self._get_observation()
             reward = self._get_reward()
-            is_done = self._action_detector()
+            is_done = False  # self._action_detector()
         else:
             self.next_observation = self._get_observation()
             reward = Environment.LOOSE_REWARD
@@ -113,7 +126,7 @@ class Environment:
         return self._actions[action_id]
 
     def reset(self) -> np.ndarray:
-        self.__init__()
+        self._initialize()
         self.next_observation = self._get_observation()
         return np.vstack([self.next_observation for _ in range(self._n_steps)])
 
@@ -132,14 +145,23 @@ class Environment:
             is_dones.append(is_done)
         next_observation = np.vstack(next_observations)
         reward = np.sum(rewards).item()
-        is_done = is_dones[-1]
+        is_done = is_dones[-1] or self._action_detector()
         return next_observation, reward, is_done, None
 
     def sample_action(self) -> int:
         return np.random.choice(len(self._actions))
 
-    def render(self, surface) -> None:
-        surface.fill(Colors.BLACK)
+    def is_closed(self) -> bool:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return True
+
+    def render(self) -> None:
+        self._surface.fill(Colors.BLACK)
         for wall in self.walls:
-            wall.show(surface)
-        self.car.sensor.show(surface)
+            wall.show(self._surface)
+        self.car.sensor.show(self._surface)
+        pygame.display.flip()
+
+    def quit(self):
+        pygame.quit()
