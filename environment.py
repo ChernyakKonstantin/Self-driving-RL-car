@@ -98,10 +98,7 @@ class Environment:
         return self.car.sensor.get_view(self.walls)
 
     def _collided(self, observation: list) -> bool:
-        if min(observation) < Environment._MIN_DISTANCE_TO_OBSTACLE:
-            return True
-        else:
-            return False
+        return min(observation) < Environment._MIN_DISTANCE_TO_OBSTACLE
 
     def _get_reward(self) -> float:
         reward = self.car.y - self.car_prev_pos

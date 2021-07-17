@@ -37,7 +37,4 @@ class ActionDetector(Observer):
             self._counter = 0
 
     def _check(self) -> bool:
-        if self._counter >= self._limit:
-            return True
-        else:
-            return False
+        return self._counter >= self._limit
