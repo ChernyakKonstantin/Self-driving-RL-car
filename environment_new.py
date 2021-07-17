@@ -1,94 +1,145 @@
-# Придумать нормальную генерацию уровней
+# TODO Придумать нормальную генерацию уровней
+# TODO Реализовать бесконечный уровень
 
 import random
-import math
+from typing import Tuple
+from colors import Colors
+import numpy as np
 
-# Импорт элементов среды
-import car
+from action_detector import ActionDetector
+from car import Car
 from obstacle import Line
 
 
 class Environment:
-    WORLD_LENGTH = 650  # см
-    WORLD_WIDTH = 300  # см
-    INIT_X = WORLD_WIDTH / 2  # Начальное положение автомобиля
-    INIT_Y = 10 #
-    ROAD_WIDTH = 50
-    START_X = INIT_X - ROAD_WIDTH / 2
-    START_Y = 5
-    X_SHIFT = 15
-    Y_SHIFT = 30
+    # Размеры мира
+    _WORLD_LENGTH = 650
+    _WORLD_LENGTH = 300
+    # Начальное положение объекта управления
+    _INIT_CAR_X = _WORLD_LENGTH / 2
+    _INIT_CAR_Y = 10
+    # Параметры трассы
+    _ROAD_WIDTH = 50
+    _START_WALL_X = _INIT_CAR_X - _ROAD_WIDTH / 2
+    _START_WALL_Y = 5
+    _WALL_X_SHIFT = 15
+    _WALL_Y_SHIFT = 30
+    # Параметры завершения эпизода
+    _NO_ACTION_LIMIT = 10
+    _MIN_DISTANCE_TO_OBSTACLE = 5
+    # Параметры награды
+    LOOSE_REWARD = -130
 
-    def __init__(self):
-        self.car = car.Car(Environment.INIT_X, Environment.INIT_Y)
-        self.actions = [self.car.move(0),
-                        self.car.move(1),  # Возможные действия
-                        self.car.move(2),
-                        self.car.move(3)]
+    @property
+    def actions(self) -> dict:
+        return self._actions
 
+    def __init__(self, n_steps: int = 4):
+        """
+        Args:
+            n_steps (int): Число повторений действия в рамках одного шага. 
+        """
+        self._n_steps = n_steps
+
+        self.car = Car(Environment._INIT_CAR_X, Environment._INIT_CAR_Y)
         self.walls = []
         self._generate_world()
-        self.car_old_pos = Environment.INIT_Y
+        self.car_prev_pos = Environment._INIT_CAR_Y
         self.observation = None
         self.next_observation = None
 
-    def reset(self):
-        self.__init__()
-        self.next_observation = self._get_observation()
-        return self.next_observation
+        self._actions = {
+            0: [],  # Ехать по инерции
+            1: [0],  # Ехать прямо
+            2: [1],  # Ехать влево
+            3: [2],  # Ехать вправо
+            4: [0, 1],  # Ехать прямо и влево
+            5: [0, 2],  # Ехать прямо и вправо
+            6: [3],  # Затормозить
+        }
 
-    def step(self, action):
-        self.observation = self.next_observation
-        if self._no_collision(self.observation):
-            self.car.move(action)  # actions[action]()  # Выполнить действие
-            self.next_observation = self._get_observation()
-            reward = self._get_reward()
-            is_done = False
-        else:
-            self.next_observation = self._get_observation()
-            reward = -130
-            is_done = True
-        return self.next_observation, reward, is_done, None  # None, чтобы не переписывать агентов
+        self._action_detector = ActionDetector(limit=Environment._NO_ACTION_LIMIT)
+        self.car._attach(self._action_detector)
 
-    def _generate_world(self):  # Генерирует новый мир
-        # random.seed(3)
-        first_point = (Environment.START_X, Environment.START_Y)
-        while first_point[1] < Environment.WORLD_LENGTH:
-            second_point_x = first_point[0] + random.choice([-1, 1]) * random.randint(0, Environment.X_SHIFT)
-            second_point_y = first_point[1] + random.randint(0, Environment.Y_SHIFT)
+    def _generate_world(self) -> None:
+        first_point = (Environment._START_WALL_X, Environment._START_WALL_Y)
+        while first_point[1] < Environment._WORLD_LENGTH:
+            second_point_x = first_point[0] + random.choice([-1, 1]) * random.randint(0, Environment._WALL_X_SHIFT)
+            second_point_y = first_point[1] + random.randint(0, Environment._WALL_Y_SHIFT)
             second_point = (second_point_x, second_point_y)
             self.walls.append(Line(*first_point, *second_point))
             first_point = second_point
         n_walls = len(self.walls)
         for index in range(n_walls):
-            self.walls.append(self.walls[index].shifted_copy(Environment.ROAD_WIDTH))
+            self.walls.append(self.walls[index].shifted_copy(Environment._ROAD_WIDTH))
 
-        # Создадим границы мира
-        self.walls.append(Line(*(0, Environment.START_Y),  # Верхняя граница
-                               *(Environment.WORLD_WIDTH, Environment.START_Y)))
+        # Верхняя граница
+        self.walls.append(Line(*(0, Environment._START_WALL_Y),
+                               *(Environment._WORLD_LENGTH, Environment._START_WALL_Y)))
 
-        self.walls.append(Line(*(0, Environment.WORLD_LENGTH),  # Нижняя граница
-                               *(Environment.WORLD_WIDTH, Environment.WORLD_LENGTH)))
+        # Нижняя граница
+        self.walls.append(Line(*(0, Environment._WORLD_LENGTH),
+                               *(Environment._WORLD_LENGTH, Environment._WORLD_LENGTH)))
 
-    def _get_observation(self):  # Возвращает наблюдения
+    def _get_observation(self) -> list:
         return self.car.sensor.get_view(self.walls)
 
-    def _no_collision(self, observation):  # Проверяет, может ли дальше двигаться автомобиль
-        if min(observation) > 5:  # self.car.radius: #Если расстояние до препятствия
-            return True  # меньше радиуса разворота автомобиля,
-        else:  # то столкновение неизбежно
+    def _check_collision(self, observation: list) -> bool:
+        if min(observation) > Environment._MIN_DISTANCE_TO_OBSTACLE:
+            return True
+        else:
             return False
 
-    def _get_reward(self):
-        reward = self.car._y - self.car_old_pos
-        self.car_old_pos = self.car._y
+    def _get_reward(self) -> float:
+        reward = self.car.y - self.car_prev_pos
+        self.car_prev_pos = self.car.y
         return reward
 
-    def sample(self):
-        return random.randint(0, 2)
+    def _step(self, action) -> Tuple[list, float, bool, None]:
+        """Метод однократного совершения действия."""
+        self.observation = self.next_observation
+        if self._check_collision(self.observation):
+            self.car.move(action)
+            self.next_observation = self._get_observation()
+            reward = self._get_reward()
+            is_done = self._action_detector()
+        else:
+            self.next_observation = self._get_observation()
+            reward = Environment.LOOSE_REWARD
+            is_done = True
+        return self.next_observation, reward, is_done, None  # None, т.к. environment не возвращает доп.информации
 
-    def render(self, surface):  # Отрисовка среды
-        surface.fill((0, 0, 0))  # Black color
+    def get_action_list(self, action_id: int) -> list:
+        return self._actions[action_id]
+
+    def reset(self) -> np.ndarray:
+        self.__init__()
+        self.next_observation = self._get_observation()
+        return np.vstack([self.next_observation for _ in range(self._n_steps)])
+
+    def step(self, action) -> Tuple[np.ndarray, float, bool, None]:
+        """
+        Метод совершения многокартного числа шагов с одним и тем же действием.
+        Эмулирует реального игрока, т.к. нажатие клавиши длится несколько циклов программы.
+        """
+        next_observations = []
+        rewards = []
+        is_dones = []
+        for _ in range(self._n_steps):
+            next_observation, reward, is_done, _ = self._step(action)
+            next_observations.append(next_observation)
+            rewards.append(reward)
+            is_dones.append(is_done)
+        next_observation = np.vstack(next_observations)
+        reward = np.sum(rewards).item()
+        is_done = is_dones[-1]
+        return next_observation, reward, is_done, None
+
+    def sample_action(self) -> int:
+        return np.random.choice(len(self._actions))
+
+    def render(self, surface) -> None:
+        surface.fill(Colors.BLACK)
         for wall in self.walls:
             wall.show(surface)
         self.car.sensor.show(surface)
