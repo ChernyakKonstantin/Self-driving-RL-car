@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.losses import MSE
@@ -7,7 +9,7 @@ from .environment import Environment
 from .experience_buffer import ExperienceBuffer
 from .net import make_lstm_qdn
 from .scheduler import EpsilonScheduler
-import os
+
 
 class Training:
     # Параметры нейронной сети
@@ -15,12 +17,14 @@ class Training:
     # Параметры обучения
     BELLMAN_GAMMA = 0.99
     MEAN_REWARD_BOUND = 500
-    BATCH_SIZE = 512
+    BATCH_SIZE = 4096
     LEARNING_RATE = 0.001
     REPLAY_START_SIZE = 10 ** 4
+    TRAIN_PERIOD = 10 ** 4
     SYNC_TARGET_FRAMES = 3 * 10 ** 4
+    EPOCHS = 10
     # Параметры накопления исторических данных
-    REPLAY_SIZE = 2 * 10 ** 4
+    REPLAY_SIZE = 10 ** 5
     # Параметры генератора случайного действия агента
     EPSILON_DECAY_LAST_FRAME = 2 * 10 ** 5
     EPSILON_START = 1.0
@@ -71,6 +75,9 @@ class Training:
 
     def _is_to_sync_networks(self, frame_index: int) -> bool:
         return frame_index % Training.SYNC_TARGET_FRAMES == 0
+
+    def _is_to_train_network(self, frame_index: int) -> bool:
+        return frame_index % Training.TRAIN_PERIOD == 0
 
     def _sync_networks(self) -> None:
         self._tgt_net.set_weights(self._net.get_weights())
@@ -129,9 +136,11 @@ class Training:
             if self._is_to_sync_networks(frame_index):
                 self._sync_networks()
 
-            batch = self._buffer.sample(Training.BATCH_SIZE)
-            loss = self._fit(batch)
-            losses.append(loss)
+            if self._is_to_train_network(frame_index):
+                for _ in range(Training.EPOCHS):
+                    batch = self._buffer.sample(Training.BATCH_SIZE)
+                    loss = self._fit(batch)
+                    losses.append(loss)
 
         save_name = f'checkpoints/last_dqn_{self._best_mean_reward}/checkpoint'
         self._tgt_net.save_weights(save_name)
