@@ -114,10 +114,12 @@ class Training:
                 done = True
 
             frame_index += 1
-            if frame_index % 1000 == 0:
-                print(frame_index)
 
             epsilon = self._scheduler.get_epsilon()
+
+            if frame_index % 1000 == 0:
+                print(f'Frame_index: {frame_index}, Epsilon: {epsilon}')
+
             reward, experience = self._agent.training_step(epsilon)
             self._buffer.append(experience)
 
