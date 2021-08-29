@@ -35,8 +35,8 @@ class Observable(metaclass=ABCMeta):
     def _notify(self):
         pass
 
-    def _attach(self, observer: Observer):
+    def attach(self, observer: Observer):
         self._observers.append(observer)
 
-    def _detach(self, observer: Observer):
+    def detach(self, observer: Observer):
         self._observers.remove(observer)
