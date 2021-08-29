@@ -3,6 +3,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.losses import MSE
+from sklearn.preprocessing import MinMaxScaler
 
 from .agent import Agent
 from .environment import Environment
@@ -19,14 +20,14 @@ class Training:
     MEAN_REWARD_BOUND = 500
     BATCH_SIZE = 4096
     LEARNING_RATE = 0.001
-    REPLAY_START_SIZE = 10 ** 4
-    TRAIN_PERIOD = 10 ** 4
-    SYNC_TARGET_FRAMES = 3 * 10 ** 4
+    REPLAY_START_SIZE = 5 * 10 ** 3
+    TRAIN_PERIOD = 5 * 10 ** 3
+    SYNC_TARGET_FRAMES = 5 * 10 ** 3
     EPOCHS = 10
     # Параметры накопления исторических данных
-    REPLAY_SIZE = 10 ** 5
+    REPLAY_SIZE = 5 * 10 ** 3
     # Параметры генератора случайного действия агента
-    EPSILON_DECAY_LAST_FRAME = 2 * 10 ** 5
+    EPSILON_DECAY_LAST_FRAME = 2 * 10 ** 4
     EPSILON_START = 1.0
     EPSILON_FINAL = 0.02
     # Параметры среды обучения
@@ -41,6 +42,8 @@ class Training:
         self.make_checkpoints_dir()
 
         self._env = Environment(Training.REPEATS_PER_STEP)
+        self._scaler = MinMaxScaler()
+        self._scaler.fit([[0], [self._env.car.sensor.get_max_ray_len()]])
         n_actions = len(self._env.actions)
         observation_shape = self._env.get_observation_shape()
 
@@ -91,6 +94,8 @@ class Training:
 
     def _fit(self, batch: tuple) -> tf.Tensor:
         states, actions, rewards, dones, next_states = batch
+        states = self._scaler.transform(states.reshape(-1, 1)).reshape(states.shape)
+        next_states = self._scaler.transform(next_states.reshape(-1, 1)).reshape(next_states.shape)
         expected_state_action_values = self._get_expected_state_action_values(rewards, dones, next_states)
 
         with tf.GradientTape() as tape:

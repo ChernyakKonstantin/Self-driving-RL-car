@@ -21,6 +21,10 @@ class Sensor(GameObject, Observer, Observable):
     _MAX_RAY_LEN = 200  # Дальность луча, см
 
     @classmethod
+    def get_max_ray_len(cls):
+        return cls._MAX_RAY_LEN
+
+    @classmethod
     def get_observation_shape(cls):
         return int(cls._AOV / cls._DEFAULT_ANGLE_STEP_DEGREE)
 
