@@ -20,7 +20,7 @@ class Observer(metaclass=ABCMeta):
 
     @abstractmethod
     def update(self):
-        pass
+        raise NotImplementedError
 
 
 class Observable(metaclass=ABCMeta):
@@ -33,10 +33,19 @@ class Observable(metaclass=ABCMeta):
 
     @abstractmethod
     def _notify(self):
-        pass
+        raise NotImplementedError
 
     def attach(self, observer: Observer):
         self._observers.append(observer)
 
     def detach(self, observer: Observer):
         self._observers.remove(observer)
+
+class Resetable(metaclass=ABCMeta):
+    """
+    Абстрактный класс сбрасываемого объекта.
+    """
+
+    @abstractmethod
+    def reset(self):
+        raise NotImplementedError
