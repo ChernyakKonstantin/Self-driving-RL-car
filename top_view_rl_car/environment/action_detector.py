@@ -1,7 +1,7 @@
-from .abstract_classes import Observer
+from .abstract_classes import Observer, Resetable
 
 
-class ActionDetector(Observer):
+class ActionDetector(Observer, Resetable):
     """Класс предназначен для детекции изменения состояния объекта управления.
         Например, случай, когда автомобиль неподвижен и поворачивает колеса, классифицируется как статичное поведение,
         которое является нежелательным.
@@ -20,6 +20,10 @@ class ActionDetector(Observer):
     def __call__(self) -> bool:
         self._counter += 1
         return self._check()
+
+    def reset(self):
+        self._counter = 0
+        self._prev_values = []
 
     def update(self, *args):
         """args - любые величны, изменения которых отслеживаются."""

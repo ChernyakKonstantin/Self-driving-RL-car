@@ -3,7 +3,6 @@
 # Проверить все линии для левой границы сенсора. Если нет пересечений - исключить все левые стенки
 # Если пересечения есть - найти минимальную по Y точку пересечения. Исключить левые стенки с Y < найденный Y. Исключить стенки с Y > найденный Y + MAX_RAY_LEN
 
-
 import math
 from typing import Any
 
@@ -36,7 +35,7 @@ class Sensor(GameObject, Observer, Observable):
         self._orientation = orientation  # Направление центра
         self._left_limit = math.radians(self._orientation + Sensor._AOV / 2)
         self._right_limit = math.radians(self._orientation - Sensor._AOV / 2)
-        self._attach(self._ray)
+        self.attach(self._ray)
 
     def _notify(self) -> None:
         for observer in self._observers:
