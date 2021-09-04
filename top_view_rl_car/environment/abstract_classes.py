@@ -19,7 +19,7 @@ class Observer(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def update(self):
+    def update(self, *args, **kwargs):
         raise NotImplementedError
 
 

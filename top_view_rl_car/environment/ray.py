@@ -1,12 +1,12 @@
 import math
 from typing import Any, Tuple, Union
 
-from numba import njit
+from numba import jit
 
 from .abstract_classes import GameObject, Observer
 
 
-@njit
+@jit
 def get_intersection_compiled(x1: float, y1: float, x2: float, y2: float,
                               x3: float, y3: float, x4: float, y4: float) -> Union[Tuple[float, float], None]:
     """

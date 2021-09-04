@@ -3,8 +3,8 @@ from tensorflow import keras
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import LSTM, Dense, InputLayer
 
-physical_devices = tf.config.list_physical_devices('GPU')
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+# physical_devices = tf.config.list_physical_devices('GPU')
+# tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 
 def make_lstm_qdn(n_inputs: int, n_steps: int, n_outputs: int, n_hidden_units: int) -> keras.Model:

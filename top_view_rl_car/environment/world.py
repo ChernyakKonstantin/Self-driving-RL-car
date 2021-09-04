@@ -20,7 +20,7 @@ class World(GameObject, Resetable):
         self._walls = []
 
     def reset(self) -> None:
-        self._obstacles = []
+        self._walls = []
         self.generate()
 
     def generate(self) -> None:

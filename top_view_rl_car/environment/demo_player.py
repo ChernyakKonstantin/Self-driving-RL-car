@@ -11,7 +11,9 @@ class DemoPlayer:
             if self._env.is_closed():
                 break
             action = tuple([e.item() for e in self._env.action_space.sample().values()])
-            _ = self._env.step(action)
+            _, _, is_done, _ = self._env.step(action)
             self._env.render()
+            if is_done:
+                self._env.reset()
 
 
