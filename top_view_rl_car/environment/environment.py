@@ -10,6 +10,7 @@ from .colision_detector import ColisionDetector
 from .colors import Colors
 from .world import World
 
+import time
 
 class Environment(core.Env):
     """
@@ -31,23 +32,23 @@ class Environment(core.Env):
     _SURFACE_SIZE = _WORLD_WIDTH + 50, _WORLD_LENGTH + 50
     # Начальное положение объекта управления
     _INIT_CAR_X = _WORLD_WIDTH / 2
-    _INIT_CAR_Y = 10
+    _INIT_CAR_Y = 30
     # Параметры трассы
-    _ROAD_WIDTH = 50
+    _ROAD_WIDTH = 100
     _START_WALL_X = int(round(_INIT_CAR_X - _ROAD_WIDTH / 2))
     _START_WALL_Y = 5
 
     # Параметры завершения эпизода
     _NO_ACTION_LIMIT = 10
-    _MIN_DISTANCE_TO_OBSTACLE = 5
+    _MIN_DISTANCE_TO_OBSTACLE = 1
     # Параметры награды
     LOOSE_REWARD = -1
 
     metadata = {'render.modes': ['human', ]}
 
     action_space = spaces.Dict({
-        'steering': spaces.Box(low=Car.MIN_STEERING_ANGLE, high=Car.MAX_STEERING_ANGLE, shape=(), dtype=np.float32),
-        'velocity': spaces.Box(low=Car.MIN_SPEED, high=Car.MAX_SPEED, shape=(), dtype=np.float32),
+        'steering': spaces.Box(low=Car.MIN_STEERING_ANGLE, high=Car.MAX_STEERING_ANGLE, shape=(1,), dtype=np.float32),
+        'velocity': spaces.Box(low=Car.MIN_SPEED, high=Car.MAX_SPEED, shape=(1,), dtype=np.float32),
     })
 
     observation_space = spaces.Dict({
@@ -57,10 +58,13 @@ class Environment(core.Env):
     })
 
     def __init__(self):
-        self._collision_detector = ColisionDetector(Environment._MIN_DISTANCE_TO_OBSTACLE)
-        self._action_detector = ActionDetector(limit=Environment._NO_ACTION_LIMIT)
         self._world = World(Environment._START_WALL_X, Environment._START_WALL_Y, Environment._WORLD_LENGTH)
         self._car = Car(Environment._INIT_CAR_X, Environment._INIT_CAR_Y)
+        self._collision_detector = ColisionDetector((self._car.x, self._car.y),
+                                                    self._car.SIZE,
+                                                    Environment._MIN_DISTANCE_TO_OBSTACLE)
+        self._action_detector = ActionDetector(limit=Environment._NO_ACTION_LIMIT)
+        self._car.attach(self._collision_detector)
         self._car.attach(self._action_detector)
         pygame.init()
         self._surface = pygame.display.set_mode(Environment._SURFACE_SIZE)
@@ -78,10 +82,11 @@ class Environment(core.Env):
     # _____Public_methods_____
 
     def reset(self) -> list:
-        # self._collision_detector.reset()
+        self._world.reset()
+        self._collision_detector.reset(*self._world.to_points_array())
         self._action_detector.reset()
         self._car.reset()
-        self._world.reset()
+
         self._next_observation = self._get_observation()
         return self._next_observation
 
@@ -96,7 +101,7 @@ class Environment(core.Env):
         TODO: Изменить на дельту.
         """
         self._observation = self._next_observation
-        is_done = self._collision_detector.check(self._observation) or self._action_detector()
+        is_done = self._collision_detector.check() # or self._action_detector()
         if not is_done:
             steering_angle, velocity = action
             self._car.move(steering_angle, velocity)
@@ -112,7 +117,8 @@ class Environment(core.Env):
         """Параметр mode не используется, но необходим для интерфейса gym."""
         self._surface.fill(Colors.BLACK)
         self._world.show(self._surface)
-        self._car.sensor.show(self._surface)
+        self._collision_detector.show(self._surface)
+        self._car.show(self._surface)
         pygame.display.flip()
 
     def close(self) -> None:

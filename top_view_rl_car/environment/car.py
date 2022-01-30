@@ -1,6 +1,9 @@
 import math
 
+import pygame.draw
+
 from .abstract_classes import GameObject, Observable, Resetable
+from .colors import Colors
 from .sensor import Sensor
 
 
@@ -11,6 +14,7 @@ class Car(Observable, GameObject, Resetable):
     MAX_STEERING_ANGLE = 45.0
     MIN_SPEED = -2.0
     MAX_SPEED = 2.0
+    SIZE = 10
 
     @property
     def x(self):
@@ -61,4 +65,6 @@ class Car(Observable, GameObject, Resetable):
         self._notify()
 
     def show(self, surface) -> None:
-        raise NotImplementedError
+        pygame.draw.circle(surface, Colors.PURPLE, (self._x, self._y), Car.SIZE, 0)
+        self.sensor.show(surface)
+

@@ -47,5 +47,5 @@ class Resetable(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def reset(self):
+    def reset(self, *args, **kwargs):
         raise NotImplementedError

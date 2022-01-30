@@ -11,6 +11,8 @@ scikit-learn = "*"
 tf-agents = "*"
 gym = "*"
 numba = "*"
+stable-baselines3 = {extras = ["extra"], version = "*"}
+torch = "*"
 
 [dev-packages]
 
