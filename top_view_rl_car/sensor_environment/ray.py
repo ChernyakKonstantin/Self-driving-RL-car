@@ -3,7 +3,7 @@ from typing import Any, Tuple, Union
 
 from numba import jit
 
-from .abstract_classes import GameObject, Observer
+from .abstract import GameObject, Observer
 
 
 @jit

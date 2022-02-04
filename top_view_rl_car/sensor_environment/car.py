@@ -2,7 +2,7 @@ import math
 
 import pygame.draw
 
-from .abstract_classes import GameObject, Observable, Resetable
+from .abstract import GameObject, Observable, Resetable
 from .colors import Colors
 from .sensor import Sensor
 

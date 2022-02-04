@@ -3,7 +3,7 @@ from typing import Union
 import numpy as np
 import pygame
 
-from .abstract_classes import GameObject, Observer, Resetable
+from .abstract import GameObject, Observer, Resetable
 from .colors import Colors
 
 

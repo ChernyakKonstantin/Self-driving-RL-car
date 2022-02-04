@@ -8,7 +8,7 @@ from typing import Any
 
 import pygame
 
-from .abstract_classes import GameObject, Observer, Observable
+from .abstract import GameObject, Observer, Observable
 from .colors import Colors
 from .ray import Ray
 

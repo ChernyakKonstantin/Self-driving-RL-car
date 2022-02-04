@@ -1,4 +1,4 @@
-from .abstract_classes import Observer, Resetable
+from .abstract import Observer, Resetable
 
 
 class ActionDetector(Observer, Resetable):

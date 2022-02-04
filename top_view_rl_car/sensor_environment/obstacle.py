@@ -2,7 +2,7 @@ from typing import Any, Tuple
 
 import pygame
 
-from .abstract_classes import GameObject
+from .abstract import GameObject
 
 
 class Line(GameObject):

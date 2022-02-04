@@ -1,7 +1,7 @@
 import random
 from typing import Tuple
 
-from .abstract_classes import GameObject, Resetable
+from .abstract import GameObject, Resetable
 from .obstacle import Line
 import numpy as np
 
