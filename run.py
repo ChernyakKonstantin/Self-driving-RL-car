@@ -1,6 +1,6 @@
 from stable_baselines3 import PPO
 
-from top_view_rl_car.environment import Environment
+from top_view_rl_car.sensor_environment import Environment
 from stable_baselines3.common.logger import configure
 
 

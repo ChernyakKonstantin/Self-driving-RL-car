@@ -4,4 +4,4 @@ from .net import make_lstm_qdn
 from .play import play
 from .scheduler import EpsilonScheduler
 from .training import Training
-from .environment import Environment
+from .sensor_environment import Environment

@@ -6,7 +6,7 @@ from tensorflow.keras.losses import MSE
 from sklearn.preprocessing import MinMaxScaler
 
 from .agent import Agent
-from .environment import Environment
+from .sensor_environment import Environment
 from .experience_buffer import ExperienceBuffer
 from .net import make_lstm_qdn
 from .scheduler import EpsilonScheduler
