@@ -1,148 +1,157 @@
-# Проверить все линии для правой границы сенсора. Если нет пересечений - исключить все правые стенки
-# Если пересечения есть - найти минимальную по Y точку пересечения. Исключить правые стенки с Y < найденный Y. Исключить стенки с Y > найденный Y + MAX_RAY_LEN
-# Проверить все линии для левой границы сенсора. Если нет пересечений - исключить все левые стенки
-# Если пересечения есть - найти минимальную по Y точку пересечения. Исключить левые стенки с Y < найденный Y. Исключить стенки с Y > найденный Y + MAX_RAY_LEN
+from typing import Tuple, Union
 
-import math
-from typing import Any
-
+import numpy as np
 import pygame
 
-from .abstract import GameObject, Observer, Observable
-from .colors import Colors
-from .ray import Ray
+from .abstract import GameObject, Observer
 
 
-class Sensor(GameObject, Observer, Observable):
-    _DEFAULT_ANGLE_STEP_DEGREE = 4
-    _DEFAULT_ANGLE_STEP_RAD = math.radians(_DEFAULT_ANGLE_STEP_DEGREE)
-    _AOV = 120  # Угол обзора сенсора, градусы
-    _MAX_RAY_LEN = 200  # Дальность луча, см
+class Sensor(GameObject, Observer):
+    """
+    A distance sensor class.
+    Simulation of a laser or ultrasonic sensor.
+    """
 
-    @classmethod
-    def get_max_ray_len(cls):
-        return cls._MAX_RAY_LEN
-
-    @classmethod
-    def get_observation_shape(cls):
-        return int(cls._AOV / cls._DEFAULT_ANGLE_STEP_DEGREE)
-
-    def __init__(self, x: Any, y: Any, orientation: Any):
+    def __init__(self,
+                 x: Union[float, int],
+                 y: Union[float, int],
+                 orientation: float,
+                 n_rays: int = 30,
+                 angle_of_view: int = 120,
+                 ray_length: float = 200):
         super(Sensor, self).__init__()
-        self._x = x
-        self._y = y
-        self._ray = Ray(self._x, self._y, Sensor._MAX_RAY_LEN)
+        self._position = pygame.Vector2(x, y)
         self._orientation = orientation  # Направление центра
-        self._left_limit = math.radians(self._orientation + Sensor._AOV / 2)
-        self._right_limit = math.radians(self._orientation - Sensor._AOV / 2)
-        self.attach(self._ray)
+        self._n_rays = n_rays
+        self._angle_of_view = angle_of_view
+        self._ray_length = ray_length
+        # x_source, y_source, x_end, y_end
+        self._rays_coordinates = np.empty(shape=(4, n_rays), dtype=float)
+        self._fill_rays_coordinates()
 
-    def _notify(self) -> None:
-        for observer in self._observers:
-            observer.update(self._x, self._y)
-
-    def _get_distance(self, obstacles: list) -> float:
+    def _get_deltas(self) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Функция определения расстояния до точки пересечения.
-        Если точка пересечения отсутствует, вернуть максимальную длину луча.
+        The method calculates shifts of the rays endpoints from the rays source.
+
+        Returns: Deltas of x and deltas of y.
         """
-        points = [self._ray.cast(*obstacle.get_coord()) for obstacle in obstacles]
-        distances = [self._ray.get_distance(*point) for point in points if point]
-        if distances:
-            return min(distances)
-        else:
-            return Sensor._MAX_RAY_LEN
+        alphas = np.linspace(self._orientation - self._angle_of_view / 2,
+                             self._orientation + self._angle_of_view / 2,
+                             num=self._n_rays)
+        alphas = np.deg2rad(alphas)
+        deltas_x = np.sin(alphas) * self._ray_length
+        deltas_y = np.cos(alphas) * self._ray_length
+        return deltas_x, deltas_y
 
-    def _get_ray_y_min_max(self):
-        end_points = []
-        for angle in range(0, Sensor._AOV, Sensor._DEFAULT_ANGLE_STEP_DEGREE):
-            end_points.append(math.cos(self._right_limit + math.radians(angle)) * Sensor._MAX_RAY_LEN)
-        return min(end_points), max(end_points)
+    def _calculate_rays_endpoints(self) -> None:
+        """
+        The method fill the storage of rays endpoints with calculated values.
+        """
+        deltas_x, deltas_y = self._get_deltas()
+        self._rays_coordinates[2] = self._position.x + deltas_x
+        self._rays_coordinates[3] = self._position.y + deltas_y
 
-    def filter_obstacles(self, obstacles: list) -> list:
-        """Метод фильтрации препятствий, которые не попадут в поле видимости."""
-        ray_end_y_min, ray_end_y_max = self._get_ray_y_min_max()
-        ray_y_min = min([ray_end_y_min, self._ray._y])
-        ray_y_max = max([ray_end_y_max, self._ray._y])
-        # Множество линий, для которых конец < y _min
-        obstacles_above_vision_field = set(obs for obs in obstacles if obs._end_point.y < ray_y_min)
-        # Множество линий, для которых начало > y_max
-        obstacles_below_vision_field = set(obs for obs in obstacles if obs._start_point.y > ray_y_max)
-        return list(set(obstacles) - obstacles_above_vision_field - obstacles_below_vision_field)
+    def _fill_rays_coordinates(self) -> None:
+        """
+        The method  fills the storage with calculated  the rays source and end coordinates.
+        """
+        self._rays_coordinates[0] = [self._position.x] * self._n_rays
+        self._rays_coordinates[1] = [self._position.y] * self._n_rays
+        self._calculate_rays_endpoints()
 
-    def get_view(self, obstacles: list) -> list:  # Получить с сенсора данные об окружении
-        view = []  # Карта мира
-        for angle in range(0, Sensor._AOV, Sensor._DEFAULT_ANGLE_STEP_DEGREE):
-            # Получить относительные координаты конца луча
-            ray_end_x = math.sin(self._right_limit + math.radians(angle)) * Sensor._MAX_RAY_LEN
-            ray_end_y = math.cos(self._right_limit + math.radians(angle)) * Sensor._MAX_RAY_LEN
-            # Получить абсолютные координаты конца луча
-            ray_end_x, ray_end_y = self._ray.translate(ray_end_x, ray_end_y)
-            # Перенести конец луча в новую точку
-            self._ray.look_at(ray_end_x, ray_end_y)
-            # Получить дистанцию до объекта
-            distance = self._get_distance(obstacles)
-            view.append(distance)
-        return view
+    def get_view(self, obstacle_coordinates: np.ndarray) -> np.ndarray:
+        """
+        The method returns distances to the obstacles. This is how the sensor sees the world.
+        Args:
+            obstacle_coordinates: Coordinates of points that form obstacles.
 
-    def _upd_ray_limits(self) -> None:
-        self._left_limit = self._orientation + math.radians(Sensor._AOV / 2)
-        self._right_limit = self._orientation - math.radians(Sensor._AOV / 2)
+        Returns: Distances to the obstacles.
+        """
+
+        intersection_points = self._cast(*self._rays_coordinates, *obstacle_coordinates)
+        intersection_points = np.stack(intersection_points)
+        distances = self._get_distance(intersection_points)
+        return distances
+
+    def _get_distance(self, intersection_points: np.ndarray) -> np.ndarray:
+        """
+        The method computes the distance from the rays source to the intersection points.
+        For absent intersection points "self._ray_length" is returned.
+
+        Args:
+            intersection_points: Points where the rays intersects obstacles.
+
+        Returns: Distances from the rays source to the intersection points.
+        """
+        distances = np.sqrt(np.square(self._rays_coordinates[[0, 1]] - intersection_points).sum(axis=0))
+        distances[np.isnan(distances)] = self._ray_length
+        return distances
 
     def update(self, x: float, y: float, orientation: float) -> None:
-        self._x = x
-        self._y = y
+        self._position.update(x, y)
         self._orientation = orientation
-        self._upd_ray_limits()
-        self._notify()
+        self._fill_rays_coordinates()
 
-    def show(self, surface) -> None:  # Отрисовка поля зрения сенсора
+    def _cast(self,
+              x1: np.ndarray,
+              y1: np.ndarray,
+              x2: np.ndarray,
+              y2: np.ndarray,
+              x3: np.ndarray,
+              y3: np.ndarray,
+              x4: np.ndarray,
+              y4: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        The method returns np.nan for rays that do not intersect an obstacle.
+        Args:
+            x1: X coordinates of a ray source.
+            y1: y coordinates of a ray source.
+            x2: X coordinates of a ray end.
+            y2: y coordinates of a ray end.
+            x3: X coordinates of an obstacle line begin.
+            y3: y coordinates of an obstacle line begin.
+            x4: X coordinates of an obstacle line end.
+            y4: y coordinates of an obstacle line end.
 
-        coord_r = self._ray.translate(math.sin(self._right_limit) * Sensor._MAX_RAY_LEN,
-                                      math.cos(self._right_limit) * Sensor._MAX_RAY_LEN)
+        Returns:
+            X, Y coordinates of intersection points.
+        """
+        max_shape = max(x1.shape[0], x3.shape[0])
+        x1_shape = x1.shape[0]
+        if x1.shape[0] < max_shape:
+            x1 = np.pad(x1, (0, max_shape - x1.shape[0]), constant_values=np.nan)
+            x2 = np.pad(x2, (0, max_shape - x2.shape[0]), constant_values=np.nan)
+            y1 = np.pad(y1, (0, max_shape - y1.shape[0]), constant_values=np.nan)
+            y2 = np.pad(y2, (0, max_shape - y2.shape[0]), constant_values=np.nan)
+        elif x3.shape[0] < max_shape:
+            x3 = np.pad(x3, (0, max_shape - x3.shape[0]), constant_values=np.nan)
+            x4 = np.pad(x4, (0, max_shape - x4.shape[0]), constant_values=np.nan)
+            y3 = np.pad(y3, (0, max_shape - y3.shape[0]), constant_values=np.nan)
+            y4 = np.pad(y4, (0, max_shape - y4.shape[0]), constant_values=np.nan)
 
-        coord_l = self._ray.translate(math.sin(self._left_limit) * Sensor._MAX_RAY_LEN,
-                                      math.cos(self._left_limit) * Sensor._MAX_RAY_LEN)
+        denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+        denom[denom == 0] = np.nan
+        x_nom = (x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)
+        y_nom = (x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)
+        x = x_nom / denom
+        y = y_nom / denom
+        on_line_1 = ((((x1 <= x) & (x <= x2)) | ((x2 <= x) & (x <= x1)))
+                     & (((y1 <= y) & (y <= y2)) | ((y2 <= y) & (y <= y1))))
+        on_line_2 = ((((x3 <= x) & (x <= x4)) | ((x4 <= x) & (x <= x3)))
+                     & (((y3 <= y) & (y <= y4)) | ((y4 <= y) & (y <= y3))))
+        x[np.invert(on_line_1 & on_line_2)] = np.nan
+        y[np.invert(on_line_1 & on_line_2)] = np.nan
 
-        coord_c = self._ray.translate(math.sin(self._orientation) * Sensor._MAX_RAY_LEN,
-                                      math.cos(self._orientation) * Sensor._MAX_RAY_LEN)
+        return x[:x1_shape], y[:x1_shape]
 
-        coord_c_r = self._ray.translate(math.sin(self._orientation - math.radians(30)) * Sensor._MAX_RAY_LEN,
-                                        math.cos(self._orientation - math.radians(30)) * Sensor._MAX_RAY_LEN)
-
-        coord_c_l = self._ray.translate(math.sin(self._orientation + math.radians(30)) * Sensor._MAX_RAY_LEN,
-                                        math.cos(self._orientation + math.radians(30)) * Sensor._MAX_RAY_LEN)
-
-        pygame.draw.line(surface,
-                         Colors.RED,
-                         (self._x, self._y),
-                         coord_r)
-
-        pygame.draw.line(surface,
-                         Colors.GREEN,
-                         (self._x, self._y),
-                         coord_l)
-
-        pygame.draw.line(surface,
-                         Colors.WHITE,
-                         (self._x, self._y),
-                         coord_c)
-
-        pygame.draw.line(surface,
-                         Colors.YELLOW,
-                         (self._x, self._y),
-                         coord_c_r)
-
-        pygame.draw.line(surface,
-                         Colors.PURPLE,
-                         (self._x, self._y),
-                         coord_c_l)
-
-        pygame.draw.arc(surface,
-                        (255, 0, 0),
-                        pygame.Rect(self._x - Sensor._MAX_RAY_LEN,
-                                    self._y - Sensor._MAX_RAY_LEN,
-                                    Sensor._MAX_RAY_LEN * 2,
-                                    Sensor._MAX_RAY_LEN * 2),
-                        self._orientation - math.radians(Sensor._AOV / 2) - math.radians(90),
-                        self._orientation + math.radians(Sensor._AOV / 2) - math.radians(90))
+    def show(self, surface) -> None:
+        """
+        The methods draw the sensor rays
+        Args:
+            surface: Surface to draw on.
+        """
+        for i in range(self._rays_coordinates.shape[-1]):
+            pygame.draw.line(surface,
+                             pygame.Color("green"),
+                             *self._rays_coordinates[:, i].reshape(2, 2),
+                             width=1)
