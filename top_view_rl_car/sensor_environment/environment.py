@@ -7,7 +7,6 @@ from gym import core, spaces
 from .action_detector import ActionDetector
 from .car import Car
 from .colision_detector import ColisionDetector
-from .colors import Colors
 from .world import World
 
 import time
@@ -115,7 +114,7 @@ class Environment(core.Env):
 
     def render(self, mode='human') -> None:
         """Параметр mode не используется, но необходим для интерфейса gym."""
-        self._surface.fill(Colors.BLACK)
+        self._surface.fill(pygame.Color("black"))
         self._world.show(self._surface)
         self._collision_detector.show(self._surface)
         self._car.show(self._surface)

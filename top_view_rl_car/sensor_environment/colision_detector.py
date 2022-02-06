@@ -4,7 +4,6 @@ import numpy as np
 import pygame
 
 from .abstract import GameObject, Observer, Resetable
-from .colors import Colors
 
 
 class ColisionDetector(Observer, Resetable, GameObject):
@@ -43,7 +42,7 @@ class ColisionDetector(Observer, Resetable, GameObject):
     #     self._p2_coords = points[:, 1]
 
     def show(self, surface):
-        pygame.draw.circle(surface, Colors.GREEN, tuple(self._object_center), self._collision_zone_radius, 1)
+        pygame.draw.circle(surface, pygame.Color("green"), tuple(self._object_center), self._collision_zone_radius, 1)
 
     # def find_dist(self) -> np.ndarray:
     #     # """p1 - x and y of one line point, p2 - for another

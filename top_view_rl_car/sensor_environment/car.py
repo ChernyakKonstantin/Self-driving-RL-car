@@ -3,7 +3,6 @@ import math
 import pygame.draw
 
 from .abstract import GameObject, Observable, Resetable
-from .colors import Colors
 from .sensor import Sensor
 
 
@@ -65,6 +64,6 @@ class Car(Observable, GameObject, Resetable):
         self._notify()
 
     def show(self, surface) -> None:
-        pygame.draw.circle(surface, Colors.PURPLE, (self._x, self._y), Car.SIZE, 0)
+        pygame.draw.circle(surface, pygame.Color('purple'), (self._x, self._y), Car.SIZE, 0)
         self.sensor.show(surface)
 
