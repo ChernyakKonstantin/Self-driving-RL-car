@@ -1,59 +1,94 @@
+import math
 import random
-from typing import Tuple
+from itertools import chain
+from typing import Union
+
+import numpy as np
+import pygame
 
 from .abstract import GameObject, Resetable
-from .obstacle import Line
-import numpy as np
+from .line import Line
+from .point import Point
+
 
 class World(GameObject, Resetable):
-    _WALL_X_SHIFT = 25
-    _WALL_Y_SHIFT = 25
-    _ROAD_WIDTH = 100
 
-    @property
-    def walls(self):
-        return self._walls
+    def __init__(self,
+                 world_width: Union[float, int],
+                 world_length: Union[float, int],
+                 n_points: int,
+                 velocity: Union[float, int],
+                 part_length: Union[float, int],
+                 road_width: Union[float, int]):
+        self._world_width = world_width
+        self._world_length = world_length
+        self._n_points = n_points
+        self._velocity = velocity
+        self._part_length = part_length
+        self._road_width = road_width
+        self.obstacle_coordinates = np.empty(shape=(4, n_points * 2), dtype=float)
 
-    def __init__(self, x_start: float, y_start: float, length: float):
-        self._x_start = x_start
-        self._y_start = y_start
-        self._x_end = self._x_start + length
-        self._walls = []
+    def _rotate(self, alpha, origin) -> None:
+        """
+        The method calculates shifts of the rays endpoints from the rays source.
+
+        Returns: Deltas of x and deltas of y.
+        """
+        if not isinstance(origin, np.ndarray):
+            origin = np.array(origin)
+        if not origin.shape == (2, 1):
+            origin = origin.reshape(2, 1)
+        alpha = np.radians(alpha)
+        rotation_matrix = np.array([[np.cos(alpha), -np.sin(alpha)],
+                                    [np.sin(alpha), np.cos(alpha)]])
+        relative_vec = self.obstacle_coordinates[[0, 2, 1, 3]].reshape(2, -1) - origin
+        rotated = rotation_matrix @ relative_vec
+        self.obstacle_coordinates = (rotated + origin).reshape(4, -1)[[0, 2, 1, 3]]
+
+    def translate(self, alpha: Union[int, float], origin):
+        """
+        The method rotates and moves points to make an illusion of moving.
+        Args:
+            alpha: Rotation angle in degrees.
+        """
+        self._rotate(alpha, origin)
+        self.obstacle_coordinates[[1, 3]] -= self._velocity
 
     def reset(self) -> None:
-        self._walls = []
         self.generate()
 
-    def generate(self) -> None:
-        x1, y1 = self._x_start, self._y_start
-        x2, y2 = self._x_start, self._y_start
-        while x1 < self._x_end:
-            x2 = x1 + random.choice([-1, 1]) * random.randint(0, World._WALL_X_SHIFT)
-            y2 = y1 + random.randint(0, World._WALL_Y_SHIFT)
-            self.walls.append(Line(x1, y1, x2, y2))
-            x1, y1 = x2, y2
-        walls_count = len(self.walls)
-        # for index in range(walls_count):
-        #     self.walls.append(self.walls[index].shifted_copy(World._ROAD_WIDTH))
+    def generate(self):
+        # A road part length in pixels
+        delta_angle = [0, ]
+        delta_angle.extend([random.randint(-45, 45) for _ in range(self._n_points - 2)])
 
-        # Верхняя граница
-        self.walls.append(Line(self._x_start, self._y_start,
-                               self._x_start + World._ROAD_WIDTH, self._y_start))
+        x = self._world_width / 2
+        y = self._world_length / 2
 
-        # Нижняя граница
-        self.walls.append(Line(x2, y2,
-                               x2 + World._ROAD_WIDTH, y2))
+        upper_point = Point(x, 0, orientation=0)
+        initial_point = Point(x, y, orientation=0)
+        points = [upper_point, initial_point, ]
+        for i in range(1, len(delta_angle)):
+            orientation = delta_angle[i - 1]
+            d_x = math.sin(math.radians(orientation)) * self._part_length
+            d_y = math.cos(math.radians(orientation)) * self._part_length
+            x += d_x
+            y += d_y
+            points.append(Point(x, y, orientation))
 
-
-    def to_points_array(self) -> Tuple[np.ndarray]:
-        # return np.reshape([wall.get_coord() for wall in self._walls], (len(self._walls), 2, 2))
-        data = np.array([wall.get_coord() for wall in self._walls])
-        x1 = data[:, 0]
-        y1 = data[:, 1]
-        x2 = data[:, 2]
-        y2 = data[:, 3]
-        return x1, y1, x2, y2
+        lines = chain.from_iterable([Line(points[i], points[i + 1]).extrude(20) for i in range(len(points) - 1)])
+        for i, line in enumerate(lines):
+            self.obstacle_coordinates[:, i] = (*line._start_point.position, *line._end_point.position)
 
     def show(self, surface):
-        for wall in self._walls:
-            wall.show(surface)
+        for i in range(self.obstacle_coordinates.shape[-1]):
+            pygame.draw.line(surface,
+                             pygame.Color("white"),
+                             *self.obstacle_coordinates[:, i].reshape(2, 2),
+                             width=1)
+
+            # for i in range(self.obstacle_coordinates[[0,2,1,3]].reshape(2,-1).shape[-1]):
+            #     pygame.draw.circle(surface,
+            #                        pygame.Color("white"),
+            #                        self.obstacle_coordinates[[0,2,1,3]].reshape(2,-1)[:, i],
+            #                        radius=3)
