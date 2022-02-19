@@ -1,16 +1,16 @@
-from .environment import Environment
-
+from .environment import SensorEnvironment
+from .congifurations import config
 
 class DemoPlayer:
     def __init__(self):
-        self._env = Environment()
+        self._env = SensorEnvironment(config)
 
     def play(self):
         self._env.reset()
         while True:
             if self._env.is_closed():
                 break
-            action = tuple([e.item() for e in self._env.action_space.sample().values()])
+            action = self._env.action_space.sample()
             _, _, is_done, _ = self._env.step(action)
             self._env.render()
             if is_done:
