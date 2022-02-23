@@ -70,9 +70,9 @@ class Sensor(GameObject, Observer):
         """
         intersection_points = self._cast(*self._rays_coordinates, *obstacle_coordinates)
         intersection_points = np.stack(intersection_points)
-        point_selection = np.invert(np.isnan(intersection_points[0]) & np.isnan(intersection_points[1]))
+        point_selection = np.invert(np.isnan(intersection_points[0]) | np.isnan(intersection_points[1]))
         self._intersection_points = intersection_points[:, point_selection]
-        distances = np.sort(self._get_distance(intersection_points))[:self._n_rays]
+        distances = self._get_distance(intersection_points).reshape(self._n_rays, -1).min(axis=1)
         return distances
 
     def _get_distance(self, intersection_points: np.ndarray) -> np.ndarray:
@@ -156,8 +156,8 @@ class Sensor(GameObject, Observer):
             return x, y
 
         ray_points = np.stack((x1, y1, x2, y2))
-        x, y = np.apply_along_axis(_cast_ray, 0, ray_points)
-        return x.reshape(-1), y.reshape(-1)
+        x, y = np.apply_along_axis(_cast_ray, axis=0, arr=ray_points)
+        return x.T.reshape(-1), y.T.reshape(-1)
 
     def show(self, surface) -> None:
         """
