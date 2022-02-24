@@ -8,6 +8,7 @@ import pygame
 from .car import Car
 from .collision_detector import CollisionDetector
 from .sensor_viewer import SensorViewer
+from .sterring_wheel_viewer import SteeringWheelViewer
 from .world import World
 
 
@@ -64,6 +65,8 @@ class SensorEnvironment(gym.Env):
             self._sensor_viewer = SensorViewer(pygame.Vector2(0, 0),
                                                config["n_rays"],
                                                max_distance=config["ray_length"])
+            self._steering_wheel_viewer = SteeringWheelViewer(pygame.Vector2(150, 0),
+                                                              0)
         else:
             self._surface = None
 
@@ -113,6 +116,8 @@ class SensorEnvironment(gym.Env):
         self._car_orientation = self._car._orientation
         self.is_done = False
         self.state = self._get_observation()
+        if self._render:
+            self._steering_wheel_viewer.reset()
         return self.state
 
     def is_closed(self) -> bool:
@@ -132,6 +137,10 @@ class SensorEnvironment(gym.Env):
         self._update_orientation(action.item())
         self.state = self._get_observation()
         self.is_done = self._collision_detector.check(self.state["sensor_data"])
+
+        if self._render:
+            self._sensor_viewer.update(self.state["sensor_data"])
+            self._steering_wheel_viewer.update(action.item())
 
         if self.is_done:
             reward = self._loose_reward
@@ -153,12 +162,11 @@ class SensorEnvironment(gym.Env):
     def render(self, mode='human') -> None:
         """Параметр mode не используется, но необходим для интерфейса gym."""
         if self._render:
-            self._sensor_viewer.update(self.state["sensor_data"])
-
             self._surface.fill(pygame.Color("black"))
             self._world.show(self._surface)
             self._car.show(self._surface)
             self._sensor_viewer.show(self._surface)
+            self._steering_wheel_viewer.show(self._surface)
             pygame.display.flip()
 
     def close(self) -> None:
