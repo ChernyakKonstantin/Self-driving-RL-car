@@ -7,6 +7,7 @@ import pygame
 
 from .car import Car
 from .collision_detector import CollisionDetector
+from .sensor_viewer import SensorViewer
 from .world import World
 
 
@@ -26,7 +27,6 @@ class SensorEnvironment(gym.Env):
     metadata = {'render.modes': ['human', ]}
 
     def __init__(self, config):
-
         self._world = World(*config["window_size"],
                             40,
                             config["velocity"],
@@ -61,6 +61,9 @@ class SensorEnvironment(gym.Env):
         if self._render:
             pygame.init()
             self._surface = pygame.display.set_mode(config["window_size"])
+            self._sensor_viewer = SensorViewer(pygame.Vector2(0, 0),
+                                               config["n_rays"],
+                                               max_distance=config["ray_length"])
         else:
             self._surface = None
 
@@ -150,9 +153,12 @@ class SensorEnvironment(gym.Env):
     def render(self, mode='human') -> None:
         """Параметр mode не используется, но необходим для интерфейса gym."""
         if self._render:
+            self._sensor_viewer.update(self.state["sensor_data"])
+
             self._surface.fill(pygame.Color("black"))
             self._world.show(self._surface)
             self._car.show(self._surface)
+            self._sensor_viewer.show(self._surface)
             pygame.display.flip()
 
     def close(self) -> None:
