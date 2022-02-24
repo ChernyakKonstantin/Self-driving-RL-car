@@ -30,6 +30,7 @@ class Sensor(GameObject, Observer):
         # Storage format: x, y
         self._intersection_points = None
         self._fill_rays_coordinates()
+        self._rays_idx = np.arange(self._n_rays)
 
     def _get_deltas(self) -> Tuple[np.ndarray, np.ndarray]:
         """
@@ -45,7 +46,7 @@ class Sensor(GameObject, Observer):
         deltas_y = np.cos(alphas) * self._ray_length
         return deltas_x, deltas_y
 
-    def _calculate_rays_endpoints(self) -> None:
+    def _calculate_rays_endpoints(self) -> Tuple[np.ndarray, np.ndarray]:
         """
         The method fill the storage of rays endpoints with calculated values.
         """
@@ -68,12 +69,13 @@ class Sensor(GameObject, Observer):
 
         Returns: Distances to the obstacles.
         """
-        intersection_points = self._cast(*self._rays_coordinates, *obstacle_coordinates)
-        intersection_points = np.stack(intersection_points)
-        point_selection = np.invert(np.isnan(intersection_points[0]) | np.isnan(intersection_points[1]))
-        self._intersection_points = intersection_points[:, point_selection]
-        distances = self._get_distance(intersection_points).reshape(self._n_rays, -1).min(axis=1)
-        return distances
+        x, y = self._cast(*self._rays_coordinates, *obstacle_coordinates)
+        distances = self._get_distance(np.stack((x, y))).reshape(self._n_rays, -1)
+        x = x.reshape(self._n_rays, -1)[self._rays_idx, distances.argmin(axis=1)]
+        y = y.reshape(self._n_rays, -1)[self._rays_idx, distances.argmin(axis=1)]
+        point_selection = np.invert(np.isnan(x) | np.isnan(y))
+        self._intersection_points = np.stack((x, y))[:, point_selection]
+        return distances.min(axis=1)
 
     def _get_distance(self, intersection_points: np.ndarray) -> np.ndarray:
         """
