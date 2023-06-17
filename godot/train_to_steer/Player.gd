@@ -8,6 +8,9 @@ onready var is_collided = false
 onready var enabled: bool = false
 # Distance sensors proxemity
 onready var max_distance_sensor_proxemity: float = 1.0  # TODO: make configurable
+# Actions
+onready var steering_delta: float
+onready var acceleration_delta: float
 
 onready var DistanceSensors = $DistanceSensors
 onready var CameraPlaceholders = $CameraPlaceholders
@@ -23,15 +26,21 @@ func _ready():
 	
 func _physics_process(delta):
 
-	# I think 0.4 is cosine value of angle the wheel turn at
-	steering = lerp(steering, Input.get_axis("move_right", "move_left") * 0.8, 5*delta)
-	var acceleration = Input.get_axis("move_backward", "move_forward")
+	# I think 0.8 is cosine value of angle the wheel turn at
+#	steering = lerp(steering, Input.get_axis("move_right", "move_left") * 0.8, 5*delta)
+	steering = lerp(steering, steering_delta * 0.8, 5*delta)
+#	var acceleration = Input.get_axis("move_backward", "move_forward")
+	var acceleration = acceleration_delta
 	var rpm
 	rpm = $back_left_wheel.get_rpm()
 	$back_left_wheel.engine_force = acceleration * max_torque * (1 - rpm / max_rpm)
 	rpm = $back_right_wheel.get_rpm()
 	$back_right_wheel.engine_force = acceleration * max_torque * (1 - rpm / max_rpm)
 	brake = Input.get_action_strength("break") * 200
+	
+	steering_delta = 0
+	acceleration_delta = 0
+	
 
 # --------
 func _configure_collision():
@@ -52,8 +61,6 @@ func _configure_cameras():
 		# TODO: remove hard-code with Camera keuword and use types
 		var camera = camera_storage.find_node(placeholder.name + "Camera")
 		placeholder.set_remote_node(camera.get_path())
-#
-
 # --------
 func get_proxemity() -> Dictionary:
 	# Return dictionary of distances from sensors
@@ -73,6 +80,12 @@ func get_wheel_position() -> float:
 	
 func get_speed() -> float:
 	return $back_left_wheel.engine_force
+# --------
+func perform_action(action: Dictionary) -> void:
+	if action.has("steering_delta"):
+		steering_delta = action["steering_delta"]
+	if action.has("acceleration_delta"):
+		acceleration_delta = action["acceleration_delta"]
 # --------
 func _on_Player_body_entered(body):
 	is_collided = true

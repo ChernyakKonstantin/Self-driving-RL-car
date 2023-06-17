@@ -90,8 +90,6 @@ func handle_connection(connection: StreamPeerTCP):
 
 	connection.disconnect_from_host()
 # --------
-func perform_action(action):
-	pass
 
 func get_frame():
 	return [1, ]

@@ -1,3 +1,5 @@
+# TODO: probably move out to json-file to share between Python and Godot.
+
 from enum import IntEnum
 
 

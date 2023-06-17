@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 opencv-python = "*"
 gymnasium = "*"
+modeler = "*"
+matplotlib = "*"
+tqdm = "*"
 
 [dev-packages]
 
