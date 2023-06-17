@@ -15,16 +15,16 @@ class EngineClient:
     def __init__(
         self,
         engine_address: Tuple[str, int],
-        chucnk_size: int = 4096
+        chunk_size: int = 4096
     ) -> None:
         """
         Simulator engine client class.
         It requests for current state and send the RL-agent action.
         engine_address: tuple of (`IP-address`, `port`).
-        chucnk_size: int: size of the chunk to receive response from engine.
+        chunk_size: int: size of the chunk to receive response from engine.
         """
         self.engine_address = engine_address
-        self.chucnk_size = chucnk_size
+        self.chunk_size = chunk_size
 
     # TODO: implement timeout and return False if timeout is exceeded.
     def request(self, request: Dict[str, Any]) -> Dict[str, Any]:
@@ -33,7 +33,7 @@ class EngineClient:
             sock.sendall(request_bytes)
             chunks = b''
             while True:
-                chunk = sock.recv(self.chucnk_size)
+                chunk = sock.recv(self.chunk_size)
                 if not chunk:
                     break
                 chunks += chunk
