@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://World.tscn" type="PackedScene" id=1]
 [ext_resource path="res://ImageCapture.gd" type="Script" id=2]
 [ext_resource path="res://GameTCPServer.gd" type="Script" id=3]
+[ext_resource path="res://DataRecorder.gd" type="Script" id=4]
 
 [node name="Main" type="Node"]
 
@@ -153,6 +154,11 @@ agent_path = NodePath("../World/Player")
 [node name="ImageCapture" type="Node" parent="GameTCPServer"]
 script = ExtResource( 2 )
 viewport_storage_path = NodePath("../../Control")
+
+[node name="DataRecorder" type="Node" parent="GameTCPServer"]
+script = ExtResource( 4 )
+
+[connection signal="physics_processed" from="World/Player" to="GameTCPServer/DataRecorder" method="_on_Player_physics_processed"]
 
 [editable path="World"]
 [editable path="World/StaticBody/parking"]

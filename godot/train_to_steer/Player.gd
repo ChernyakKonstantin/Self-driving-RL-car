@@ -1,7 +1,11 @@
 extends VehicleBody
-
+# --------
+const STEPS_PER_CALL = 4
+# --------
 export var camera_storage_path: NodePath
-
+# --------
+signal physics_processed
+# --------
 # Flag whether the agent has colided
 onready var is_collided = false 
 # Flag whether to compute the agent movements
@@ -11,6 +15,8 @@ onready var max_distance_sensor_proxemity: float = 1.0  # TODO: make configurabl
 # Actions
 onready var steering_delta: float
 onready var acceleration_delta: float
+
+onready var step_counter: int = 0
 
 onready var DistanceSensors = $DistanceSensors
 onready var CameraPlaceholders = $CameraPlaceholders
@@ -25,22 +31,23 @@ func _ready():
 	_configure_cameras()
 	
 func _physics_process(delta):
-
-	# I think 0.8 is cosine value of angle the wheel turn at
-	steering = lerp(steering, Input.get_axis("move_right", "move_left") * 0.8, 5*delta)
-#	steering = lerp(steering, steering_delta * 0.8, 5*delta)
-	var acceleration = Input.get_axis("move_backward", "move_forward")
-#	var acceleration = acceleration_delta
-	var rpm
-	rpm = $back_left_wheel.get_rpm()
-	$back_left_wheel.engine_force = acceleration * max_torque * (1 - rpm / max_rpm)
-	rpm = $back_right_wheel.get_rpm()
-	$back_right_wheel.engine_force = acceleration * max_torque * (1 - rpm / max_rpm)
-	brake = Input.get_action_strength("break") * 200
-	
-	steering_delta = 0
-	acceleration_delta = 0
-
+	if step_counter < STEPS_PER_CALL:
+		step_counter = step_counter + 1
+		# I think 0.8 is cosine value of angle the wheel turn at
+	#	steering = lerp(steering, Input.get_axis("move_right", "move_left") * 0.8, 5*delta)
+		steering = lerp(steering, steering_delta * 0.8, 5*delta)
+	#	var acceleration = Input.get_axis("move_backward", "move_forward")
+		var acceleration = acceleration_delta
+		var rpm
+		rpm = $back_left_wheel.get_rpm()
+		$back_left_wheel.engine_force = acceleration * max_torque * (1 - rpm / max_rpm)
+		rpm = $back_right_wheel.get_rpm()
+		$back_right_wheel.engine_force = acceleration * max_torque * (1 - rpm / max_rpm)
+		brake = Input.get_action_strength("break") * 200
+		
+		steering_delta = 0
+		acceleration_delta = 0
+		emit_signal("physics_processed")
 # --------
 func _configure_collision():
 	set_contact_monitor(true)
@@ -81,6 +88,7 @@ func get_speed() -> float:
 	return $back_left_wheel.engine_force
 # --------
 func perform_action(action: Dictionary) -> void:
+	step_counter = 0
 	if action.has("steering_delta"):
 		steering_delta = action["steering_delta"]
 	if action.has("acceleration_delta"):

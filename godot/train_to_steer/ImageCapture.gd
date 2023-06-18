@@ -20,9 +20,8 @@ func _set_viewports(viewport_storage: Node) -> void:
 func get_viewport_frame(viewport: Viewport) -> PoolByteArray:
 	var texture_image: Image
 	var frame_data: PoolByteArray
-
 	texture_image = viewport.get_texture().get_data()
-	texture_image.flip_y()
+#	texture_image.flip_y()  # TODO: It slows down game too much
 	texture_image.convert(Image.FORMAT_RGB8)
 	frame_data = texture_image.get_data()
 	return frame_data
@@ -33,14 +32,5 @@ func get_frame() -> Dictionary:
 		var frame: PoolByteArray = get_viewport_frame(viewport)
 		viewports_frame[viewport.name] = frame
 	return viewports_frame
-
-#func get_frame() -> PoolByteArray:
-#	var viewports_frame = PoolByteArray()
-#	for viewport in viewports:
-#		var frame: PoolByteArray = get_viewport_frame(viewport)
-#		viewports_frame.append_array(frame)
-#		print(viewports_frame.size())
-#	print()
-#	return viewports_frame
 
 # TODO: implement getting of depthmaps

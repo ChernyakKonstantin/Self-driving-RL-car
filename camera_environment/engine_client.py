@@ -45,22 +45,26 @@ class EngineClient:
                 response = np.frombuffer(chunks, dtype=np.int32)
             elif response_dtype == "float32":
                 response = np.frombuffer(chunks, dtype=np.float32)
-            elif response_dtype == "dictionary":
+            elif response_dtype == "dictionary_list":
                 response = json.loads(chunks.decode("utf-8"))
-            elif response_dtype == "image_dictionary":
-                response = {}
+            elif response_dtype == "image_dictionary_list":
+                response = []
+                record = {}
                 print(len(chunks))
                 while len(chunks) > 0:
                     key_len = np.frombuffer(chunks[:4], dtype=np.uint32)[0]
                     chunks = chunks[4:]
                     key = chunks[:key_len].decode()
+                    if key in record:
+                        response.append(record)
+                        record = {}
                     chunks = chunks[key_len:]
                     data_len = np.frombuffer(chunks[:4], dtype=np.uint32)[0]
                     chunks = chunks[4:]
                     data = np.frombuffer(chunks[:data_len], dtype=np.uint8)
                     data = data.reshape(240,360,3)
                     chunks = chunks[data_len:]
-                    response[key] = data
+                    record[key] = data
                     print(len(chunks))
                 # key_length = chunks[:4]
         return response

@@ -14,10 +14,10 @@ while True:
     }
 
     requested_observation = [
-        (Request.FRAME, "image_dictionary"),
+        (Request.FRAME, "image_dictionary_list"),
         (Request.IS_CRASHED, "int32"),
         (Request.WHEEL_POSITION, "float32"),
-        (Request.OBSTACLE_PROXEMITY, "dictionary"),
+        (Request.OBSTACLE_PROXEMITY, "dictionary_list"),
         (Request.SPEED, "float32"),
     ]
 
