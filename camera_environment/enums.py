@@ -13,8 +13,6 @@ class Request(IntEnum):
     FRAME = 1
     IS_CRASHED = 2
     WHEEL_POSITION = 3
-    ACCELERATION = 4
-    SPEED = 5
-    DISTANCE_TO_OBSTACLE = 6
-    # TODO: subject of further changes. Currently its assumed to be position in the graph.
-    NAVIGATION = 7
+    SPEED = 4
+    OBSTACLE_PROXEMITY = 5
+

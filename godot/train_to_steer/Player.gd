@@ -40,7 +40,6 @@ func _physics_process(delta):
 	
 	steering_delta = 0
 	acceleration_delta = 0
-	
 
 # --------
 func _configure_collision():
