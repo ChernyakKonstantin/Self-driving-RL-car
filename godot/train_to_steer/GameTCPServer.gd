@@ -77,12 +77,6 @@ func handle_connection(connection: StreamPeerTCP):
 			var response: float = agent.get_speed()
 			print("Speed ", response)
 			connection.put_float(response)  # float32
-	
-#	var json_str = JSON.print(response)
-#	var response_package_size = json_str.length()
-#	print("Response size is: ", request_package_size)
-#	connection.put_32(response_package_size) 
-#	print(connection.put_data(json_str.to_utf8()) )
 	connection.disconnect_from_host()
 # --------
 func get_depth_map():

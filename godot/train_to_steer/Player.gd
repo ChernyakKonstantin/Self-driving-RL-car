@@ -27,10 +27,10 @@ func _ready():
 func _physics_process(delta):
 
 	# I think 0.8 is cosine value of angle the wheel turn at
-#	steering = lerp(steering, Input.get_axis("move_right", "move_left") * 0.8, 5*delta)
-	steering = lerp(steering, steering_delta * 0.8, 5*delta)
-#	var acceleration = Input.get_axis("move_backward", "move_forward")
-	var acceleration = acceleration_delta
+	steering = lerp(steering, Input.get_axis("move_right", "move_left") * 0.8, 5*delta)
+#	steering = lerp(steering, steering_delta * 0.8, 5*delta)
+	var acceleration = Input.get_axis("move_backward", "move_forward")
+#	var acceleration = acceleration_delta
 	var rpm
 	rpm = $back_left_wheel.get_rpm()
 	$back_left_wheel.engine_force = acceleration * max_torque * (1 - rpm / max_rpm)

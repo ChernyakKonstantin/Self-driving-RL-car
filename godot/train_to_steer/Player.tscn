@@ -1,96 +1,65 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Player.gd" type="Script" id=1]
+[ext_resource path="res://Car/wheel.glb" type="PackedScene" id=2]
+[ext_resource path="res://Car/car.glb" type="PackedScene" id=3]
 
-[sub_resource type="CubeMesh" id=7]
-size = Vector3( 1.62, 0.7, 2.49 )
-
-[sub_resource type="SpatialMaterial" id=6]
-albedo_color = Color( 0.929412, 0.121569, 0.121569, 1 )
-
-[sub_resource type="CubeMesh" id=1]
-size = Vector3( 1.62, 0.73, 4.13 )
-
-[sub_resource type="ConvexPolygonShape" id=5]
-points = PoolVector3Array( 0.81, 0.715, 2.065, 0.81, -0.715, 2.065, 0.81, 0.715, -2.065, -0.81, 0.715, 2.065, -0.81, -0.715, 2.065, 0.81, -0.715, -2.065, -0.81, 0.715, -2.065, -0.81, -0.715, -2.065 )
-
-[sub_resource type="SpatialMaterial" id=3]
-albedo_color = Color( 0, 0, 0, 1 )
-
-[sub_resource type="CylinderMesh" id=4]
-material = SubResource( 3 )
-top_radius = 0.4
-bottom_radius = 0.4
-height = 0.25
-radial_segments = 12
+[sub_resource type="BoxShape" id=1]
 
 [node name="Player" type="VehicleBody"]
 contact_monitor = true
 script = ExtResource( 1 )
 
-[node name="CarBody2" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.882379, 0.115109 )
-mesh = SubResource( 7 )
-skeleton = NodePath("")
-material/0 = SubResource( 6 )
-
-[node name="CarBody" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.169862, 0 )
-mesh = SubResource( 1 )
-skeleton = NodePath("")
-material/0 = SubResource( 6 )
-
 [node name="CollisionShape" type="CollisionShape" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.526151, 0 )
-shape = SubResource( 5 )
+transform = Transform( 0.814, 0, 0, 0, 0.58, 0, 0, 0, 2.033, 0, 0.656804, 0 )
+shape = SubResource( 1 )
+
+[node name="car" parent="." instance=ExtResource( 3 )]
+transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0.531053, 0.016 )
 
 [node name="front_left_wheel" type="VehicleWheel" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1.4549 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.683452, 0.12294, 1.4549 )
 use_as_steering = true
-wheel_radius = 0.4
+wheel_radius = 0.31
 suspension_stiffness = 50.0
 damping_compression = 1.9
 damping_relaxation = 2.0
 
-[node name="MeshInstance" type="MeshInstance" parent="front_left_wheel"]
-transform = Transform( -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0 )
-mesh = SubResource( 4 )
+[node name="wheel" parent="front_left_wheel" instance=ExtResource( 2 )]
+transform = Transform( -2.18557e-08, 0.5, 0, -0.5, -2.18557e-08, 0, 0, 0, 0.5, 0, 0, 0 )
 
 [node name="front_right_wheel" type="VehicleWheel" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 1.4549 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.683, 0.123, 1.455 )
 use_as_steering = true
-wheel_radius = 0.4
+wheel_radius = 0.31
 suspension_stiffness = 50.0
 damping_compression = 1.9
 damping_relaxation = 2.0
 
-[node name="MeshInstance" type="MeshInstance" parent="front_right_wheel"]
-transform = Transform( -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0 )
-mesh = SubResource( 4 )
+[node name="wheel" parent="front_right_wheel" instance=ExtResource( 2 )]
+transform = Transform( -2.18557e-08, -0.5, 0, 0.5, -2.18557e-08, 0, 0, 0, 0.5, 0, 0, 0 )
 
 [node name="back_left_wheel" type="VehicleWheel" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -0.932884 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.683, 0.123, -1.00964 )
 use_as_traction = true
-wheel_radius = 0.4
+wheel_radius = 0.31
 suspension_stiffness = 50.0
 damping_compression = 1.9
 damping_relaxation = 2.0
 
-[node name="MeshInstance" type="MeshInstance" parent="back_left_wheel"]
-transform = Transform( -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0 )
-mesh = SubResource( 4 )
+[node name="wheel" parent="back_left_wheel" instance=ExtResource( 2 )]
+transform = Transform( -2.18557e-08, 0.5, 0, -0.5, -2.18557e-08, 0, 0, 0, 0.5, 0, 0, 0 )
 
 [node name="back_right_wheel" type="VehicleWheel" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -0.932884 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.683, 0.123, -1.00964 )
 use_as_traction = true
-wheel_radius = 0.4
+wheel_radius = 0.31
 suspension_stiffness = 50.0
 damping_compression = 1.9
 damping_relaxation = 2.0
 
-[node name="MeshInstance" type="MeshInstance" parent="back_right_wheel"]
-transform = Transform( -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0 )
-mesh = SubResource( 4 )
+[node name="wheel" parent="back_right_wheel" instance=ExtResource( 2 )]
+transform = Transform( -2.18557e-08, -0.5, 0, 0.5, -2.18557e-08, 0, 0, 0, 0.5, 0, 0, 0 )
 
 [node name="DistanceSensors" type="Spatial" parent="."]
 
@@ -121,27 +90,29 @@ enabled = true
 [node name="CameraPlaceholders" type="Spatial" parent="."]
 
 [node name="Front" type="RemoteTransform" parent="CameraPlaceholders"]
-transform = Transform( -1, 1.51808e-08, -8.60946e-08, 0, 0.984808, 0.173648, 8.74227e-08, 0.173648, -0.984807, 0, 1.19723, 1.537 )
+transform = Transform( -1, -7.6194e-09, 8.709e-08, 0, 0.996195, 0.0871557, -8.74228e-08, 0.0871558, -0.996194, 0, 1.07738, 0.649342 )
 
 [node name="FrontLeft" type="RemoteTransform" parent="CameraPlaceholders"]
-transform = Transform( 0.999999, 0, 0, 0, 1, 0, 0, 0, 1, 0.955, 0.473565, 0.968 )
+transform = Transform( 0.999999, 0, 0, 0, 1, 0, 0, 0, 1, 0.955, 0.523012, 1.43882 )
 
 [node name="FrontRight" type="RemoteTransform" parent="CameraPlaceholders"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.971398, 0.473565, 0.967937 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.971, 0.523, 1.439 )
 
 [node name="Back" type="RemoteTransform" parent="CameraPlaceholders"]
-transform = Transform( 1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984807, 0, 1.197, -1.279 )
+transform = Transform( 1, 0, 0, 0, 0.996195, 0.0871557, 0, -0.0871558, 0.996194, 0, 1.07958, -0.902858 )
 
 [node name="BackRight" type="RemoteTransform" parent="CameraPlaceholders"]
-transform = Transform( -1, 0, -8.74227e-08, 0, 1, 0, 8.74228e-08, 0, -1, -0.955, 0.473565, -0.596284 )
+transform = Transform( -1, 0, -8.74227e-08, 0, 1, 0, 8.74228e-08, 0, -1, -0.955, 0.523, -1.00548 )
 
 [node name="BackLeft" type="RemoteTransform" parent="CameraPlaceholders"]
-transform = Transform( -1, 0, -8.74227e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.955, 0.473565, -0.596761 )
-
-[node name="Right" type="RemoteTransform" parent="CameraPlaceholders"]
-transform = Transform( -4.37114e-08, -0.173648, 0.984807, 0, 0.984808, 0.173648, -1, 7.59041e-09, -4.30473e-08, -0.863, 1.045, 0.214 )
+transform = Transform( -1, 0, -8.74227e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.955, 0.523, -1.00648 )
 
 [node name="Left" type="RemoteTransform" parent="CameraPlaceholders"]
-transform = Transform( -4.37114e-08, 0.173648, -0.984807, 0, 0.984808, 0.173648, 1, 7.59041e-09, -4.30473e-08, 0.863119, 1.04504, 0.213791 )
+transform = Transform( -4.37114e-08, 0.0871558, -0.996194, 0, 0.996195, 0.0871557, 1, 3.8097e-09, -4.3545e-08, 0.677, 1.045, 0.214 )
+
+[node name="Right" type="RemoteTransform" parent="CameraPlaceholders"]
+transform = Transform( -4.37114e-08, -0.0871558, 0.996194, 0, 0.996195, 0.0871557, -1, 3.8097e-09, -4.3545e-08, -0.677437, 1.045, 0.214 )
 
 [connection signal="body_entered" from="." to="." method="_on_Player_body_entered"]
+
+[editable path="car"]

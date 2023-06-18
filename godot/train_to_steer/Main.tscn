@@ -157,3 +157,4 @@ viewport_storage_path = NodePath("../../Control")
 [editable path="World"]
 [editable path="World/StaticBody/parking"]
 [editable path="World/Player"]
+[editable path="World/Player/car"]
