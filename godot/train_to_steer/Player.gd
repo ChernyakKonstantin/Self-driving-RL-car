@@ -1,10 +1,11 @@
 extends VehicleBody
 # --------
-const STEPS_PER_CALL = 4
+const STEPS_PER_CALL = 4  # TODO: make configurable
 # --------
 export var camera_storage_path: NodePath
 # --------
 signal physics_processed
+signal action_done
 # --------
 # Flag whether the agent has colided
 onready var is_collided = false 
@@ -29,14 +30,14 @@ func _ready():
 	_configure_collision()
 	_configure_distance_sensors()
 	_configure_cameras()
+	connect("body_entered", self, "_on_collision")
 	
 func _physics_process(delta):
 	if step_counter < STEPS_PER_CALL:
-		step_counter = step_counter + 1
 		# I think 0.8 is cosine value of angle the wheel turn at
-	#	steering = lerp(steering, Input.get_axis("move_right", "move_left") * 0.8, 5*delta)
+#		steering = lerp(steering, Input.get_axis("move_right", "move_left") * 0.8, 5*delta)
 		steering = lerp(steering, steering_delta * 0.8, 5*delta)
-	#	var acceleration = Input.get_axis("move_backward", "move_forward")
+#		var acceleration = Input.get_axis("move_backward", "move_forward")
 		var acceleration = acceleration_delta
 		var rpm
 		rpm = $back_left_wheel.get_rpm()
@@ -48,6 +49,9 @@ func _physics_process(delta):
 		steering_delta = 0
 		acceleration_delta = 0
 		emit_signal("physics_processed")
+	step_counter = step_counter + 1
+	if step_counter == STEPS_PER_CALL:
+		emit_signal("action_done")
 # --------
 func _configure_collision():
 	set_contact_monitor(true)
@@ -81,7 +85,7 @@ func get_proxemity() -> Dictionary:
 func get_is_crashed() -> bool:
 	return is_collided
 
-func get_wheel_position() -> float:
+func get_steering() -> float:
 	return steering
 	
 func get_speed() -> float:
@@ -94,6 +98,6 @@ func perform_action(action: Dictionary) -> void:
 	if action.has("acceleration_delta"):
 		acceleration_delta = action["acceleration_delta"]
 # --------
-func _on_Player_body_entered(body):
+func _on_collision(body):
 	is_collided = true
 

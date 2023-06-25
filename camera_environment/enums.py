@@ -16,3 +16,8 @@ class Request(IntEnum):
     SPEED = 4
     OBSTACLE_PROXEMITY = 5
 
+class DataType(IntEnum):
+    INT32 = 1
+    FLOAT32 = 2
+    JSON = 3
+    NAMED_IMAGE = 4

@@ -32,5 +32,3 @@ func get_frame() -> Dictionary:
 		var frame: PoolByteArray = get_viewport_frame(viewport)
 		viewports_frame[viewport.name] = frame
 	return viewports_frame
-
-# TODO: implement getting of depthmaps

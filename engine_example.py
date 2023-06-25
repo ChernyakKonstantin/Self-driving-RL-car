@@ -14,12 +14,12 @@ while True:
     }
 
     requested_observation = [
-        (Request.FRAME, "image_dictionary_list"),
-        (Request.IS_CRASHED, "int32"),
-        (Request.WHEEL_POSITION, "float32"),
-        (Request.OBSTACLE_PROXEMITY, "dictionary_list"),
-        (Request.SPEED, "float32"),
+        Request.FRAME,
+        # Request.IS_CRASHED,
+        # Request.WHEEL_POSITION,
+        # Request.OBSTACLE_PROXEMITY,
+        # Request.SPEED,
     ]
 
     response = client.request_step(action, requested_observation)
-    pass
+    print(response)
