@@ -23,7 +23,7 @@ func get_viewport_frame(viewport: Viewport) -> PoolByteArray:
 	texture_image = viewport.get_texture().get_data()
 #	texture_image.flip_y()  # TODO: It slows down game too much
 	texture_image.convert(Image.FORMAT_RGB8)
-	frame_data = texture_image.get_data()
+	frame_data = texture_image.save_png_to_buffer()
 	return frame_data
 
 func get_frame() -> Dictionary:

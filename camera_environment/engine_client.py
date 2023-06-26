@@ -3,8 +3,10 @@ import socket
 from typing import Any, Dict, Tuple
 import numpy as np
 from collections import defaultdict
+from PIL import Image
+from io import BytesIO
 from .enums import DataType
-
+from time import time
 class EngineClient:
     STATUS_KEY = "status"
     CONFIG_KEY = "config"
@@ -63,8 +65,7 @@ class EngineClient:
             for _ in range(number_of_images):
                 data, buffer_size = self._get_int32(data)
                 raw_value = data[:buffer_size]
-                value = np.frombuffer(raw_value, dtype=np.uint8)
-                value = value.reshape(self.IMAGE_DIMS)
+                value = np.array(Image.open(BytesIO(raw_value)))
                 values[key].append(value)
                 data = data[buffer_size:]
         return data, values
