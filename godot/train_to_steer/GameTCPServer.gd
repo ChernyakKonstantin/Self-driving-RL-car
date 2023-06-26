@@ -105,7 +105,7 @@ func _put_named_image(name: String, value: Dictionary, connection: StreamPeerTCP
 		connection.put_32(DataType.NAMED_IMAGE)  # Data type
 		connection.put_32(value.size())  # Number of keys
 		for key in value.keys():
-			connection.put_string(name)  # Image name
+			connection.put_string(key)  # Image name
 			connection.put_32(value[key].size())  # Number of images
 			for image in value[key]:
 				connection.put_32(image.size()) # Image length in bytes
