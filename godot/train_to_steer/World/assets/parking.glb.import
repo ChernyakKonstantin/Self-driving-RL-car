@@ -2,12 +2,12 @@
 
 importer="scene"
 type="PackedScene"
-path="res://.import/parking.glb-b803926cc7e843595a68a0975f35714b.scn"
+path="res://.import/parking.glb-63c45817a1f55d2700e441b7f6738b64.scn"
 
 [deps]
 
-source_file="res://ParkingLot/parking.glb"
-dest_files=[ "res://.import/parking.glb-b803926cc7e843595a68a0975f35714b.scn" ]
+source_file="res://World/assets/parking.glb"
+dest_files=[ "res://.import/parking.glb-63c45817a1f55d2700e441b7f6738b64.scn" ]
 
 [params]
 

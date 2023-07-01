@@ -21,7 +21,7 @@ class EngineClient:
     def __init__(
         self,
         engine_address: Tuple[str, int],
-        chunk_size: int = 4096
+        chunk_size: int = 65536
     ) -> None:
         """
         Simulator engine client class.
@@ -65,7 +65,8 @@ class EngineClient:
             for _ in range(number_of_images):
                 data, buffer_size = self._get_int32(data)
                 raw_value = data[:buffer_size]
-                value = np.array(Image.open(BytesIO(raw_value)))
+                value = np.frombuffer(raw_value, dtype=np.uint8)
+                value = value.reshape(self.IMAGE_DIMS)
                 values[key].append(value)
                 data = data[buffer_size:]
         return data, values
