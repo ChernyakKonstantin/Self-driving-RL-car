@@ -10,6 +10,7 @@ enum Request {
 	STEERING = 3,
 	SPEED = 4, 
 	OBSTACLE_PROXEMITY = 5,  # Distance the closest object;
+	LIDAR = 6,
 }
 
 enum DataType {
@@ -93,6 +94,9 @@ func _send_response(observation_request: Array, connection: StreamPeerTCP) -> vo
 	if Request.SPEED in observation_request:
 		var speed: float = agent.get_speed()
 		_put_float32("speed", speed, connection)
+	if Request.LIDAR in observation_request:
+		var lidar_data: Array = agent.get_lidar_data()
+		_put_json("lidar", lidar_data, connection)
 
 func _put_float32(name: String, value: float, connection: StreamPeerTCP) -> void:
 	connection.put_string(name)  # Data name
@@ -104,7 +108,8 @@ func _put_int32(name: String, value: int, connection: StreamPeerTCP) -> void:
 	connection.put_32(DataType.INT32)  # Data type
 	connection.put_32(value)
 
-func _put_json(name: String, value: Dictionary, connection: StreamPeerTCP) -> void:
+func _put_json(name: String, value, connection: StreamPeerTCP) -> void:
+	# value can be Array or Dictionary
 	var value_: PoolByteArray = JSON.print(value).to_utf8() # Encode to bytes
 	connection.put_string(name)  # Data name
 	connection.put_32(DataType.JSON)  # Data type

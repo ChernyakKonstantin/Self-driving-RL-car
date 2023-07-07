@@ -71,6 +71,12 @@ class EngineClient:
                 data = data[buffer_size:]
         return data, values
 
+    def _get_array(self, data: bytes):
+        data, buffer_size = self._get_int32(data)
+        raw_value = data[:buffer_size]
+        value = np.frombuffer(raw_value, dtype=np.float32)
+        return data[buffer_size:], value
+
     def _get_data_from_stream(self, connection: socket.socket) -> bytes:
         chunks = b''
         while True:

@@ -15,6 +15,7 @@ class Request(IntEnum):
     WHEEL_POSITION = 3
     SPEED = 4
     OBSTACLE_PROXEMITY = 5
+    LIDAR = 6
 
 class DataType(IntEnum):
     INT32 = 1

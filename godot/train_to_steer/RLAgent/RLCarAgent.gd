@@ -19,9 +19,11 @@ onready var car = $Car
 
 onready var parking_sensors = $Sensors/ParkingSensors
 onready var rgb_cameras = $Sensors/RGBCameras
+onready var lidar = $Sensors/LIDAR
 
 onready var rgb_cameras_data_storage = Dictionary() 
 onready var parking_sensors_data_storage: = Dictionary()
+#onready var lidar_data_storage: = Dictionary()
 
 # -------- built-ins --------
 func _ready():
@@ -32,6 +34,7 @@ func _ready():
 func _physics_process(_delta):
 	_append_record_to_storage(rgb_cameras_data_storage, get_rgb_cameras_data())
 	_append_record_to_storage(parking_sensors_data_storage, get_parking_sensors_data())
+#	_append_record_to_storage(lidar_data_storage, get_lidar_data())
 
 # -------- configurators --------
 func _configure_parking_sensors():
@@ -63,6 +66,9 @@ func get_rgb_cameras_data() -> Dictionary:
 	for camera in rgb_cameras.get_children():
 		result[camera.get_name()] = camera.get_child(0).get_frame() 
 	return result
+	
+func get_lidar_data() -> Array:  #Dictionary:
+	return lidar.get_distances()
 
 func get_is_crashed() -> bool:
 	return car.get_is_crashed()
@@ -91,5 +97,5 @@ func _append_record_to_storage(storage: Dictionary, data: Dictionary) -> void:
 func clear_storage() -> void:
 	rgb_cameras_data_storage.clear()
 	parking_sensors_data_storage.clear()
-
+#	lidar_data_storage.clear()
 
