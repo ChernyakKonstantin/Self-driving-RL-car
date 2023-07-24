@@ -15,8 +15,4 @@ func _ready():
 # -------- getters --------
 func get_data() -> Image:
 	return viewport_texture.get_data()
-
-# -------- setters --------
-func set_remote_transform(remote_transform: RemoteTransform):
-	remote_transform.set_remote_node(camera_handle.get_path())
 	

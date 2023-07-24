@@ -53,45 +53,29 @@ cast_to = Vector3( 0, 0, 1 )
 [node name="RGBCameras" type="Spatial" parent="Sensors"]
 script = ExtResource( 7 )
 
-[node name="Front" type="RemoteTransform" parent="Sensors/RGBCameras"]
+[node name="Front" parent="Sensors/RGBCameras" instance=ExtResource( 4 )]
 transform = Transform( -1, 7.6194e-09, -8.70901e-08, 0, 0.996195, 0.0871557, 8.74228e-08, 0.0871557, -0.996195, 0, 1.077, 0.649 )
 
-[node name="RGBCamera" parent="Sensors/RGBCameras/Front" instance=ExtResource( 4 )]
-
-[node name="FrontLeft" type="RemoteTransform" parent="Sensors/RGBCameras"]
+[node name="FrontLeft" parent="Sensors/RGBCameras" instance=ExtResource( 4 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.955, 0.523, 1.439 )
 
-[node name="RGBCamera" parent="Sensors/RGBCameras/FrontLeft" instance=ExtResource( 4 )]
-
-[node name="FrontRight" type="RemoteTransform" parent="Sensors/RGBCameras"]
+[node name="FrontRight" parent="Sensors/RGBCameras" instance=ExtResource( 4 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.971, 0.523, 1.439 )
 
-[node name="RGBCamera" parent="Sensors/RGBCameras/FrontRight" instance=ExtResource( 4 )]
-
-[node name="Back" type="RemoteTransform" parent="Sensors/RGBCameras"]
+[node name="Back" parent="Sensors/RGBCameras" instance=ExtResource( 4 )]
 transform = Transform( 1, 0, 0, 0, 0.996195, 0.0871557, 0, -0.0871557, 0.996195, 0, 1.08, -0.903 )
 
-[node name="RGBCamera" parent="Sensors/RGBCameras/Back" instance=ExtResource( 4 )]
-
-[node name="BackRight" type="RemoteTransform" parent="Sensors/RGBCameras"]
+[node name="BackRight" parent="Sensors/RGBCameras" instance=ExtResource( 4 )]
 transform = Transform( -1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -0.955, 0.523, -1.005 )
 
-[node name="RGBCamera" parent="Sensors/RGBCameras/BackRight" instance=ExtResource( 4 )]
-
-[node name="BackLeft" type="RemoteTransform" parent="Sensors/RGBCameras"]
+[node name="BackLeft" parent="Sensors/RGBCameras" instance=ExtResource( 4 )]
 transform = Transform( -1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0.955, 0.523, -1.006 )
 
-[node name="RGBCamera" parent="Sensors/RGBCameras/BackLeft" instance=ExtResource( 4 )]
+[node name="Left" parent="Sensors/RGBCameras" instance=ExtResource( 4 )]
+transform = Transform( -4.37114e-08, 0.0871557, -0.996195, -3.09639e-16, 0.996195, 0.0871557, 1, 3.8097e-09, -4.35451e-08, 0.677, 1.045, 0.214 )
 
-[node name="Left" type="RemoteTransform" parent="Sensors/RGBCameras"]
-transform = Transform( -4.37114e-08, 0.0871557, -0.996195, 0, 0.996195, 0.0871557, 1, 3.8097e-09, -4.35451e-08, 0.677, 1.045, 0.214 )
-
-[node name="RGBCamera" parent="Sensors/RGBCameras/Left" instance=ExtResource( 4 )]
-
-[node name="Right" type="RemoteTransform" parent="Sensors/RGBCameras"]
+[node name="Right" parent="Sensors/RGBCameras" instance=ExtResource( 4 )]
 transform = Transform( -4.37114e-08, -0.0871557, 0.996195, 0, 0.996195, 0.0871557, -1, 3.8097e-09, -4.35451e-08, -0.677, 1.045, 0.214 )
-
-[node name="RGBCamera" parent="Sensors/RGBCameras/Right" instance=ExtResource( 4 )]
 
 [node name="Car" parent="." instance=ExtResource( 3 )]
 
