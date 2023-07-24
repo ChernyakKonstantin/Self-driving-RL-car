@@ -5,7 +5,7 @@ import gymnasium as gym
 import numpy as np
 # from gymnasium import spaces
 from gym import spaces
-from .engine_client import EngineClient
+from .godot_client import GodotClient
 import cv2
 
 
@@ -15,7 +15,7 @@ class TrainToSteerEnv(gym.Env):
     def __init__(
         self,
         image_size: Sequence[int],
-        engine_client: EngineClient,
+        engine_client: GodotClient,
         wheel_rotation_limit_per_step: Tuple[float, float] = (-10., 10.),
         n_frames_to_stack: int = 4,
         reward_values: Dict[str, float] = {

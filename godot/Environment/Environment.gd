@@ -65,7 +65,7 @@ func _physics_process(_delta):
 			if request.has(OBSERVATION_KEY):
 				_send_response(request[OBSERVATION_KEY], connection)
 			request.clear()
-			agent.clear_storage()
+			agent.data_recorder.clear_storage()
 			connection.disconnect_from_host()
 			have_connection = false
 			
@@ -80,11 +80,14 @@ func _read_request(connection: StreamPeerTCP) -> Dictionary:
 func _send_response(observation_request: Array, connection: StreamPeerTCP) -> void:
 	connection.put_32(observation_request.size())
 	if Request.FRAME in observation_request:
-		var frames: Dictionary = agent.rgb_cameras_data_storage
+		var frames: Dictionary = agent.get_rgb_camera_data()
 		_put_named_image("cameras", frames, connection)
 	if Request.OBSTACLE_PROXEMITY in observation_request:
-		var obstacle_proxemity: Dictionary = agent.parking_sensors_data_storage
+		var obstacle_proxemity: Dictionary = agent.get_parking_sensors_data()
 		_put_json("obstacle_proxemity", obstacle_proxemity, connection)
+	if Request.LIDAR in observation_request:
+		var lidar_data: Array = agent.get_lidar_data()
+		_put_json("lidar", lidar_data, connection)
 	if Request.IS_CRASHED in observation_request:
 		var is_crashed: int = agent.get_is_crashed()
 		_put_int32("is_crashed", is_crashed, connection)
@@ -94,9 +97,6 @@ func _send_response(observation_request: Array, connection: StreamPeerTCP) -> vo
 	if Request.SPEED in observation_request:
 		var speed: float = agent.get_speed()
 		_put_float32("speed", speed, connection)
-	if Request.LIDAR in observation_request:
-		var lidar_data: Array = agent.get_lidar_data()
-		_put_json("lidar", lidar_data, connection)
 
 func _put_float32(name: String, value: float, connection: StreamPeerTCP) -> void:
 	connection.put_string(name)  # Data name

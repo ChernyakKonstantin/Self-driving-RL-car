@@ -14,11 +14,13 @@ func _ready():
 func _create() -> void:
 	var start_h: float = -horizontal_fov / 2
 	var start_v: float = -vertical_fov / 2
+	var n_vertical_points = int(vertical_fov / vertical_resolution)
+	var n_horizontal_points = int(horizontal_fov / horizontal_resolution)
 
 #	assert(fmod(vertical_fov, vertical_resolution) == 0, str(vertical_fov / vertical_resolution))
 #	assert(fmod(horizontal_fov, horizontal_resolution) == 0, str(horizontal_fov / horizontal_resolution))
-	for j in range(int(vertical_fov / vertical_resolution)):
-		for i in range(int(horizontal_fov / horizontal_resolution)):
+	for j in range(n_vertical_points):
+		for i in range(n_horizontal_points):
 			var ray = RayCast.new()
 			ray.set_enabled(true)
 			ray.set_exclude_parent_body(true)
@@ -32,14 +34,8 @@ func _create() -> void:
 			)
 			ray.set_rotation_degrees(rotation)
 			add_child(ray)
-#			var visual = ImmediateGeometry.new()
-#			visual.begin(Mesh.PRIMITIVE_LINES)
-#			visual.add_vertex(Vector3(0,0,0))
-#			visual.add_vertex(Vector3(0,0,ray_max_len))
-#			visual.end()
-#			ray.add_child(visual)
 
-func get_distances() -> Array:
+func get_data() -> Array:
 	var distances = []
 	for ray in get_children():
 		var rotation: Vector3 = ray.get_rotation_degrees()

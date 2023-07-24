@@ -1,5 +1,5 @@
-from .steering_only_environment import SteeringOnlyEnvironment
+from .train_to_steer import TrainToSteerEnv
 
 __all__ = [
-    "SteeringOnlyEnvironment",
+    "TrainToSteerEnv",
 ]

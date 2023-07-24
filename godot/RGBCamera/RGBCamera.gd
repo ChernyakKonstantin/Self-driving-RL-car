@@ -13,7 +13,7 @@ func _ready():
 	viewport.set_update_mode(Viewport.UPDATE_ALWAYS)
 	
 # -------- getters --------
-func get_frame() -> Image:
+func get_data() -> Image:
 	return viewport_texture.get_data()
 
 # -------- setters --------
