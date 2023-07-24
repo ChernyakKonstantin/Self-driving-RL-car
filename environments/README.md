@@ -1,0 +1,1 @@
+This directory contains environments to train a RL-agent on differenet tasks implemented in GODOT engine.

@@ -9,7 +9,7 @@ from .engine_client import EngineClient
 import cv2
 
 
-class SteeringOnlyEnvironment(gym.Env):
+class TrainToSteerEnv(gym.Env):
     """Wrapper to handle GODOT any other side simulators with same interface."""
 
     def __init__(

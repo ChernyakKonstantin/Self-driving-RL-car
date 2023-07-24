@@ -1,13 +1,17 @@
 import json
 import socket
-from typing import Any, Dict, Tuple
-import numpy as np
 from collections import defaultdict
-from PIL import Image
 from io import BytesIO
-from .enums import DataType
 from time import time
-class EngineClient:
+from typing import Any, Dict, Tuple
+
+import numpy as np
+from PIL import Image
+
+from .enums import DataType
+
+
+class GodotClient:
     STATUS_KEY = "status"
     CONFIG_KEY = "config"
     RESET_KEY = "reset"
