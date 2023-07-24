@@ -1,0 +1,46 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://RLAgent/RLCarAgent.tscn" type="PackedScene" id=1]
+[ext_resource path="res://World/Track.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Environment/Environment.gd" type="Script" id=3]
+
+[sub_resource type="Curve3D" id=1]
+_data = {
+"points": PoolVector3Array( 0, 0, 0, 0, 0, 0, 0.0170623, 0, -8.35457, 0, 0, 0, 0, 0, 0, -18.5628, 0, -8.35457, 0, 0, 0, 0, 0, 0, -24.8869, 0, -4.53793, 0, 0, 0, 0, 0, 0, -27.8099, 0, 1.30801, 0, 0, 0, 0, 0, 0, -30.3516, 0, 4.61223, 0, 0, 0, 0, 0, 0, -39.3111, 0, 8.36126, 0, 0, 0, 0, 0, 0, -43.6956, 0, 12.7457, 0, 0, 0, 0, 0, 0, -44.331, 0, 19.7354, 0, 0, 0, 0, 0, 0, -43.2508, 0, 24.1199, 0, 0, 0, 0, 0, 0, -39.0049, 0, 27.0229, 0, 0, 0, 0, 0, 0, -22.7706, 0, 26.7505, 0, 0, 0, 0, 0, 0, -18.4124, 0, 24.8982, 0, 0, 0, 0, 0, 0, -16.5056, 0, 20.7579, 0, 0, 0, 0, 0, 0, -16.9959, 0, 14.9833, 0, 0, 0, 0, 0, 0, -15.3435, 0, 11.5762, 0, 0, 0, 0, 0, 0, -10.8587, 0, 9.13364, 0, 0, 0, 0, 0, 0, -6.37393, 0, 7.93236, 0, 0, 0, 0, 0, 0, -3.13047, 0, 8.65313, 0, 0, 0, 0, 0, 0, -0.761587, 0, 11.2243, 0, 0, 0, 0, 0, 0, -1.08845, 0, 15.5825, 0, 0, 0, 0, 0, 0, -2.0685, 0, 20.9482, 0, 0, 0, 0, 0, 0, -0.107304, 0, 24.7617, 0, 0, 0, 0, 0, 0, 3.70614, 0, 26.3415, 0, 0, 0, 0, 0, 0, 10.0255, 0, 26.396, 0, 0, 0, 0, 0, 0, 14.7651, 0, 25.8512, 0, 0, 0, 0, 0, 0, 18.1427, 0, 24.7617, 0, 0, 0, 0, 0, 0, 19.1233, 0, 21.2751, 0, 0, 0, 0, 0, 0, 19.2868, 0, 17.7885, 0, 0, 0, 0, 0, 0, 16.7114, 0, 15.774, 0, 0, 0, 0, 0, 0, 11.9063, 0, 14.853, 0, 0, 0, 0, 0, 0, 7.74187, 0, 13.3714, 0, 0, 0, 0, 0, 0, 5.77978, 0, 9.247, 0, 0, 0, 0, 0, 0, 6.78084, 0, 5.72324, 0, 0, 0, 0, 0, 0, 13.7114, 0, 0.421868, 0, 0, 0, 0, 0, 0, 15.1929, 0, -2.82159, 0, 0, 0, 0, 0, 0, 13.5512, 0, -6.70574, 0, 0, 0, 0, 0, 0, 9.54691, 0, -8.30745, 0, 0, 0, 0, 0, 0, 0.0170623, 0, -8.35457, 0, 0, 0, 0, 0, 0, -4.62106, 1.221, -15.3847, 0, 0, 0, 0, 0, 0, -4.73154, 2.02602, -14.4175 ),
+"tilts": PoolRealArray( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )
+}
+
+[node name="Environment" type="Node"]
+script = ExtResource( 3 )
+
+[node name="RLCarAgent" parent="." instance=ExtResource( 1 )]
+transform = Transform( 4.75775e-06, 0, -0.999998, 0, 1, 0, 0.999999, 0, 4.75774e-06, 0.0170623, 0, -8.35457 )
+
+[node name="RemoteTransform" type="RemoteTransform" parent="RLCarAgent/Car" index="7"]
+transform = Transform( -0.998666, 0.00710369, 0.0511477, 0.0175301, 0.97831, 0.206404, -0.0485721, 0.207026, -0.977129, 2.38419e-07, 2.36436, -5.66678 )
+remote_path = NodePath("../../../Camera")
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 0.0485672, -0.207025, 0.977127, 0.0175301, 0.97831, 0.206404, -0.998666, 0.00710467, 0.051143, 5.68383, 2.36436, -8.35459 )
+
+[node name="Track" parent="." instance=ExtResource( 2 )]
+
+[node name="DirectionalLight" type="DirectionalLight" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.284584, 0.958651, 0, -0.958651, 0.284584, 0, 9.11547, 0 )
+
+[node name="Path" type="Path" parent="."]
+visible = false
+curve = SubResource( 1 )
+
+[node name="PathFollow" type="PathFollow" parent="Path"]
+transform = Transform( 4.75775e-06, 0, -0.999998, 0, 1, 0, 0.999999, 0, 4.75774e-06, 0.0170623, 0, -8.35457 )
+visible = false
+rotation_mode = 4
+
+[node name="RemoteTransform" type="RemoteTransform" parent="Path/PathFollow"]
+visible = false
+remote_path = NodePath("../../../RLCarAgent")
+
+[editable path="RLCarAgent"]
+[editable path="RLCarAgent/Car"]
+[editable path="RLCarAgent/Car/car"]

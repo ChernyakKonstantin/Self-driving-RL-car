@@ -3,10 +3,8 @@ extends Spatial
 # --------
 const STEPS_PER_CALL = 4  # TODO: make configurable
 # --------
-export var camera_storage_path: NodePath
-# --------
 # Flag whether the agent has colided
-onready var is_collided = false 
+onready var is_collided = false
 # Flag whether to compute the agent movements
 onready var enabled: bool = false
 # Distance sensors proxemity
@@ -21,7 +19,7 @@ onready var parking_sensors = $Sensors/ParkingSensors
 onready var rgb_cameras = $Sensors/RGBCameras
 onready var lidar = $Sensors/LIDAR
 
-onready var rgb_cameras_data_storage = Dictionary() 
+onready var rgb_cameras_data_storage = Dictionary()
 onready var parking_sensors_data_storage: = Dictionary()
 #onready var lidar_data_storage: = Dictionary()
 
@@ -49,7 +47,7 @@ func _configure_rgb_cameras():
 	for camera_placeholder in rgb_cameras.get_children():
 		camera_placeholder.get_child(0).set_name(camera_placeholder.get_name())
 		camera_placeholder.get_child(0).set_remote_transform(camera_placeholder)
-		
+
 # -------- getters --------
 func get_parking_sensors_data() -> Dictionary:
 	var result = {}
@@ -58,16 +56,15 @@ func get_parking_sensors_data() -> Dictionary:
 			var collison_point = ray.get_collision_point()
 			result[ray.name] = ray.global_translation.distance_to(collison_point)
 		else:
-			 result[ray.name] = max_distance_sensor_proxemity 
+			 result[ray.name] = max_distance_sensor_proxemity
 	return result
 
 func get_rgb_cameras_data() -> Dictionary:
 	var result = {}
-	for camera in rgb_cameras.get_children():
-		result[camera.get_name()] = camera.get_child(0).get_frame() 
-	return result
-	
-func get_lidar_data() -> Array:  #Dictionary:
+	for cameralidar new
+
+
+		_data() -> Array:  #Dictionary:
 	return lidar.get_distances()
 
 func get_is_crashed() -> bool:
@@ -78,14 +75,14 @@ func get_steering() -> float:
 #
 func get_speed() -> float:
 	return car.get_speed()
-	
+
 # -------- setters --------
 func set_action(action: Dictionary) -> void:
 	if action.has("steering_delta"):
 		car.steering_delta = action["steering_delta"]
 	if action.has("acceleration_delta"):
 		car.acceleration_delta = action["acceleration_delta"]
-		
+
 # -------- helpers --------
 func _append_record_to_storage(storage: Dictionary, data: Dictionary) -> void:
 	for key in data.keys():

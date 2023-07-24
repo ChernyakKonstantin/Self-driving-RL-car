@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://RLAgent/RLCarAgent.tscn" type="PackedScene" id=1]
-[ext_resource path="res://World/World.tscn" type="PackedScene" id=2]
+[ext_resource path="res://World/Parking.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Environment/Environment.gd" type="Script" id=3]
 
 [node name="Environment" type="Node"]
@@ -10,9 +10,11 @@ script = ExtResource( 3 )
 [node name="RLCarAgent" parent="." instance=ExtResource( 1 )]
 transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -17.6973, 0.235682, 0 )
 
-[node name="World" parent="." instance=ExtResource( 2 )]
+[node name="Parking" parent="." instance=ExtResource( 2 )]
 
 [node name="Camera" type="Camera" parent="."]
-transform = Transform( -4.31351e-08, 0.161845, -0.986816, 7.07447e-09, 0.986816, 0.161845, 1, -4.44089e-16, -4.37114e-08, -29.2502, 6.04318, 0 )
+transform = Transform( -4.37114e-08, 0.109804, -0.993953, 0, 0.993953, 0.109804, 1, 4.79967e-09, -4.34471e-08, -23, 2.71, -0.755 )
 
 [editable path="RLCarAgent"]
+[editable path="RLCarAgent/Car"]
+[editable path="RLCarAgent/Car/car"]
