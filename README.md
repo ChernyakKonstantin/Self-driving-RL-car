@@ -1,16 +1,33 @@
-Проект по обучению модели автомобиля с датчиками расстояния езде по по извилистой дороге.
+# TCP
+### Client request package
+Bytes: JSON-file with request:
 
-Для нахождения расстояния используется алгорит ray casting.
-В качестве RL-алгоритма используется DQN.
+1. Environment configuration request:
+```
+  {
+    "configuration": {<name>: <value>,...},
+  }
+```
 
-Дальнейшее развитие:
-1) Оптимизация времени вычисления расстояния;
-2) Оптимизация размера нейронной сети;
-3) Имплементация более совершенного RL-алгоритма:
-4) Имплементация более сложного уровня;
-5) Имплементация бесконечного уровня;
-6) Имплементация связки с Arduino:
-  6.1) Имплементация управления на базе Arduino;
-  6.2) Имплементация связки с Arduino по Wi-Fi.
+2. Environmnet step request:
+```
+  {
+    "actions": {<name>: <value>,...},
+    "observations": [<value_1>, ...],
+  }
+```
+### Server response package
+Bytes: JSON-file with response:
+1. Environment configuration response:
+```
+  {
+    "configuration": {<name>: SUCCESS / FAILED},
+  }
+```
 
-Все данные о вращении хранятся в градусах!
+```
+  {
+    "actions": SUCCESS / FAILED,
+    "observations": {<name>: <value>, ...},
+  }
+```
