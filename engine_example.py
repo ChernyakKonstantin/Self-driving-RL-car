@@ -13,17 +13,17 @@ c = 0
 while True:
     c += 1
     action = {
-        "steering_delta": choice([-1, 1]),
-        "acceleration_delta": 1, #choice([-1, 1]),
+        "steering_delta": choice([-0.2, 0.2]),
+        "engine_force_delta": 1, #choice([-1/50, 1/50]),
     }
 
     requested_observation = [
         # Request.FRAME,
         # Request.LIDAR,
         Request.IS_CRASHED,
-        Request.WHEEL_POSITION,
-        Request.OBSTACLE_PROXEMITY,
-        Request.SPEED,
+        # Request.WHEEL_POSITION,
+        # Request.PARKING_SENSORS,
+        # Request.SPEED,
     ]
 
     response = client.request_step(action, requested_observation)

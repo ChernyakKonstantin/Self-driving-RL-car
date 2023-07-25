@@ -9,7 +9,7 @@ enum Request {
 	IS_CRASHED = 2,
 	STEERING = 3,
 	SPEED = 4,
-	OBSTACLE_PROXEMITY = 5,  # Distance the closest object;
+	PARKING_SENSORS = 5,  # Distance the closest object;
 	LIDAR = 6,
 }
 
@@ -48,31 +48,15 @@ func _ready():
 	get_tree().set_pause(true)
 
 func _physics_process(_delta):
-	if not have_connection:
-		if server.is_connection_available():
-			connection = server.take_connection()
-			request = _read_request(connection)
-			if request.has(ACTION_KEY):
-				agent.set_action(request[ACTION_KEY])
-				# Enable physics
-				get_tree().set_pause(false)
-				have_connection = true
-	if have_connection:
-		# Send observation if step is done
-		step_counter += 1
-		if step_counter % repeat_action == 0:
-			# Disable physics
-			get_tree().set_pause(true)
-#			if request.has(CONFIG_KEY):
-#				_configure(request[CONFIG_KEY])
-			if request.has(RESET_KEY):
-				_reset()
-			if request.has(OBSERVATION_KEY):
-				_send_response(request[OBSERVATION_KEY], connection)
-			request.clear()
-			agent.data_recorder.clear_storage()
-			connection.disconnect_from_host()
-			have_connection = false
+	if not have_connection and server.is_connection_available():
+		connection = server.take_connection()
+		request = _read_request(connection)
+		have_connection = true
+	else:
+		if request.has(RESET_KEY):
+			_on_reset(request, connection)
+		elif request.has(ACTION_KEY):
+			_on_action(request, connection)
 
 # -------- helpers --------
 func _read_request(connection: StreamPeerTCP) -> Dictionary:
@@ -80,31 +64,59 @@ func _read_request(connection: StreamPeerTCP) -> Dictionary:
 	var request_data = connection.get_utf8_string(request_package_size)
 	var request = JSON.parse(request_data).result
 	return request
-
-func _reset():
-	world.reset()
-	agent.reset(world.get_initial_position())
-
+	
 #func _configure(configuration: Dictionary):
 #	if configuration.has("repeat_action"):
 #		repeat_action = configuration["repeat_action"]
+
+func _on_action(request: Dictionary, connection: StreamPeerTCP):
+	agent.set_action(request[ACTION_KEY])
+	if get_tree().is_paused():
+			get_tree().set_pause(false)  # Enable physics
+	if step_counter == repeat_action:
+		get_tree().set_pause(true)
+		_send_response(request[OBSERVATION_KEY], connection)
+		_on_after_send_response(connection)
+		step_counter = 0
+	else:
+		step_counter += 1
+
+func _on_reset(request: Dictionary, connection: StreamPeerTCP):
+	print("Reset is required")
+	world.reset()
+	agent.reset(world.sample_initial_position())
+	step_counter = 0
+	for i in range(repeat_action):
+		agent.data_recorder.record()
+	_send_response(request[OBSERVATION_KEY], connection)
+	_on_after_send_response(connection)
+
+func _on_after_send_response(connection: StreamPeerTCP):
+	request.clear()
+	agent.data_recorder.clear_storage()
+	connection.disconnect_from_host()
+	have_connection = false
+
 
 func _send_response(observation_request: Array, connection: StreamPeerTCP) -> void:
 	connection.put_32(observation_request.size())
 	if Request.FRAME in observation_request:
 		var frames: Dictionary = agent.get_rgb_camera_data()
 		_put_named_image("cameras", frames, connection)
-	if Request.OBSTACLE_PROXEMITY in observation_request:
-		var obstacle_proxemity: Dictionary = agent.get_parking_sensors_data()
-		_put_json("obstacle_proxemity", obstacle_proxemity, connection)
+	if Request.PARKING_SENSORS in observation_request:
+		var parking_sensors_data: Dictionary = agent.get_parking_sensors_data()
+		print("parking_sensors_data: ", parking_sensors_data)
+		_put_json("parking_sensor", parking_sensors_data, connection)
 	if Request.LIDAR in observation_request:
 		var lidar_data: Array = agent.get_lidar_data()
 		_put_json("lidar", lidar_data, connection)
 	if Request.IS_CRASHED in observation_request:
 		var is_crashed: int = agent.get_is_crashed()
+		print("Is_crashed: ", is_crashed)
 		_put_int32("is_crashed", is_crashed, connection)
 	if Request.STEERING in observation_request:
 		var steering: float = agent.get_steering()
+		print("Steering: ", steering)
 		_put_float32("steering", steering, connection)
 	if Request.SPEED in observation_request:
 		var speed: float = agent.get_speed()

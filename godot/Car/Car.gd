@@ -31,6 +31,7 @@ func _configure_collision():
 	set_contact_monitor(true)
 	set_max_contacts_reported(4)
 	connect("body_entered", self, "_on_collision")
+	connect("body_exited", self, "_on_collsion_release")
 
 # -------- setters --------
 func set_sensors(sensors: NodePath):
@@ -48,7 +49,7 @@ func set_steering_delta(value: float):
 
 func set_engine_force_delta(value: float):
 	# TODO: Implement
-	engine_force = 30
+	pass
 
 # -------- getters --------
 func get_is_crashed() -> bool:
@@ -64,7 +65,7 @@ func get_speed() -> float:
 # -------- helpers --------
 func _calculate_engine_force():
 	# TODO: implement
-	pass
+	engine_force = 30
 
 func _calculate_steering():
 	relative_steering = clamp(relative_steering + steering_delta, -1, 1)
@@ -73,3 +74,6 @@ func _calculate_steering():
 # -------- events --------
 func _on_collision(_body):
 	is_collided = true
+	
+func _on_collision_release(_body):
+	is_collided = false

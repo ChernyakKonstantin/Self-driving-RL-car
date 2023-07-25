@@ -14,7 +14,7 @@ class Request(IntEnum):
     IS_CRASHED = 2
     WHEEL_POSITION = 3
     SPEED = 4
-    OBSTACLE_PROXEMITY = 5
+    PARKING_SENSORS = 5
     LIDAR = 6
 
 class DataType(IntEnum):
