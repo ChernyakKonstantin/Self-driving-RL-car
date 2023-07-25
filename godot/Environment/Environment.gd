@@ -2,7 +2,7 @@ extends Node
 # --------
 export var address: String = "127.0.0.1"
 export var port: int = 9090
-export var repeat_action: int = 4  # TODO: make configurable
+
 # --------
 enum Request {
 	FRAME = 1,
@@ -30,13 +30,14 @@ const OBSERVATION_KEY = "observation"
 onready var server = TCP_Server.new()
 onready var agent = $RLCarAgent
 onready var world = $World
-onready var step_counter: int = 0
+
 onready var have_connection: bool = false
 onready var connection: StreamPeerTCP
 onready var request: Dictionary
 
 # -------- built-ins --------
 func _ready():
+	agent.connect("done_action", self, "_on_done_action")
 	# Listen for incoming connections
 	server.listen(port, address)
 
@@ -52,7 +53,6 @@ func _physics_process(_delta):
 		connection = server.take_connection()
 		request = _read_request(connection)
 		have_connection = true
-	else:
 		if request.has(RESET_KEY):
 			_on_reset(request, connection)
 		elif request.has(ACTION_KEY):
@@ -69,25 +69,20 @@ func _read_request(connection: StreamPeerTCP) -> Dictionary:
 #	if configuration.has("repeat_action"):
 #		repeat_action = configuration["repeat_action"]
 
+func _on_reset(request: Dictionary, connection: StreamPeerTCP):
+	world.reset()
+	agent.reset(world.sample_initial_position())
+	_send_response(request[OBSERVATION_KEY], connection)
+	_on_after_send_response(connection)
+	
 func _on_action(request: Dictionary, connection: StreamPeerTCP):
 	agent.set_action(request[ACTION_KEY])
 	if get_tree().is_paused():
 			get_tree().set_pause(false)  # Enable physics
-	if step_counter == repeat_action:
-		get_tree().set_pause(true)
-		_send_response(request[OBSERVATION_KEY], connection)
-		_on_after_send_response(connection)
-		step_counter = 0
-	else:
-		step_counter += 1
 
-func _on_reset(request: Dictionary, connection: StreamPeerTCP):
-	print("Reset is required")
-	world.reset()
-	agent.reset(world.sample_initial_position())
-	step_counter = 0
-	for i in range(repeat_action):
-		agent.data_recorder.record()
+#func _on_done_action(request: Dictionary, connection: StreamPeerTCP):
+func _on_done_action():
+	get_tree().set_pause(true)
 	_send_response(request[OBSERVATION_KEY], connection)
 	_on_after_send_response(connection)
 
@@ -96,7 +91,6 @@ func _on_after_send_response(connection: StreamPeerTCP):
 	agent.data_recorder.clear_storage()
 	connection.disconnect_from_host()
 	have_connection = false
-
 
 func _send_response(observation_request: Array, connection: StreamPeerTCP) -> void:
 	connection.put_32(observation_request.size())
