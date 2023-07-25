@@ -1,9 +1,5 @@
 extends Spatial
 
-# Actions
-onready var steering_delta: float
-onready var acceleration_delta: float
-
 onready var car = $Car
 onready var data_recorder = $DataRecorder
 
@@ -36,9 +32,9 @@ func get_parking_sensors_data() -> Dictionary:
 # -------- setters --------
 func set_action(action: Dictionary) -> void:
 	if action.has("steering_delta"):
-		car.set_steering(action["steering_delta"])
-	if action.has("acceleration_delta"):
-		car.set_acceleration(action["acceleration_delta"])
+		car.set_steering_delta(action["steering_delta"])
+	if action.has("engine_force_delta"):
+		car.set_engine_force_delta(action["engine_force_delta"])
 
 # --------
 func reset(new_position: Spatial):
