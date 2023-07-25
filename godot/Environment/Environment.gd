@@ -78,9 +78,8 @@ func _on_reset(request: Dictionary, connection: StreamPeerTCP):
 func _on_action(request: Dictionary, connection: StreamPeerTCP):
 	agent.set_action(request[ACTION_KEY])
 	if get_tree().is_paused():
-			get_tree().set_pause(false)  # Enable physics
+		get_tree().set_pause(false)  # Enable physics
 
-#func _on_done_action(request: Dictionary, connection: StreamPeerTCP):
 func _on_done_action():
 	get_tree().set_pause(true)
 	_send_response(request[OBSERVATION_KEY], connection)
