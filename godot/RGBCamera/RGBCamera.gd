@@ -11,7 +11,7 @@ func _ready():
 	viewport.set_vflip(true)
 	viewport.set_size(viewport_size)
 	viewport.set_update_mode(Viewport.UPDATE_ALWAYS)
-	
+
 # -------- getters --------
 func get_data() -> Image:
 	return viewport_texture.get_data()
