@@ -17,11 +17,21 @@ script = ExtResource( 1 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.32895, 0.445837 )
 
 [node name="ParkingSensors" type="Spatial" parent="Sensors"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.139883, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.340226, 0 )
 script = ExtResource( 5 )
 
 [node name="Front" type="RayCast" parent="Sensors/ParkingSensors"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0165759, 1.92878 )
+enabled = true
+cast_to = Vector3( 0, 0, 1 )
+
+[node name="Right" type="RayCast" parent="Sensors/ParkingSensors"]
+transform = Transform( -4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -0.816, 0.017, -0.018 )
+enabled = true
+cast_to = Vector3( 0, 0, 1 )
+
+[node name="Left" type="RayCast" parent="Sensors/ParkingSensors"]
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0.815801, 0.017, -0.018 )
 enabled = true
 cast_to = Vector3( 0, 0, 1 )
 
