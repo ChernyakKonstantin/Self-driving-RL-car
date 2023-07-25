@@ -11,7 +11,7 @@ config_version=4
 [application]
 
 config/name="TrainToSteer"
-run/main_scene="res://Environment/TrackEnvironment.tscn"
+run/main_scene="res://Environment/ParkingEnvironment.tscn"
 config/icon="res://icon.png"
 
 [display]

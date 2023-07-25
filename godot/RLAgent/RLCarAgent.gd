@@ -39,3 +39,9 @@ func set_action(action: Dictionary) -> void:
 		car.set_steering(action["steering_delta"])
 	if action.has("acceleration_delta"):
 		car.set_acceleration(action["acceleration_delta"])
+
+# --------
+func reset(new_position: Spatial):
+	car.set_global_translation(new_position.get_global_translation())
+	car.set_global_rotation(new_position.get_global_rotation())
+	car.is_collided = false

@@ -10,7 +10,7 @@ script = ExtResource( 3 )
 [node name="RLCarAgent" parent="." instance=ExtResource( 1 )]
 transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -17.6973, 0.235682, 0 )
 
-[node name="Parking" parent="." instance=ExtResource( 2 )]
+[node name="World" parent="." instance=ExtResource( 2 )]
 
 [node name="Camera" type="Camera" parent="."]
 transform = Transform( -4.37114e-08, 0.109804, -0.993953, 0, 0.993953, 0.109804, 1, 4.79967e-09, -4.34471e-08, -23, 2.71, -0.755 )

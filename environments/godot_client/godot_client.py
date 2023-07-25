@@ -125,13 +125,12 @@ class GodotClient:
     #     request = {self.STATUS_KEY: 1}
     #     return self.request(request)
 
-    # # TODO subject of changes
-    # def configure(self, config: Dict[str, Any]) -> bool:
-    #     """
-    #     Configure the engine.
-    #     """
-    #     request = {self.CONFIG_KEY: config}
-    #     return self.request(request)
+    def configure(self, config: Dict[str, Any]) -> bool:
+        """
+        Configure the engine.
+        """
+        request = {self.CONFIG_KEY: config}
+        return self.request(request)
 
     def request_step(
             self,
@@ -148,15 +147,15 @@ class GodotClient:
         response = self.request(request)
         return response
 
-    # def reset(
-    #         self,
-    #         requested_observation: Tuple[int],
-    #     ) -> Dict[str, Any]:
-    #     """
-    #     Request engine to reset environment and return specified observations.
-    #     """
-    #     request = {
-    #         self.RESET_KEY: 1,  # TODO: subject of changes
-    #         self.OBSERVATION_KEY: requested_observation,
-    #     }
-    #     return self.request(request)
+    def reset(
+            self,
+            requested_observation: Tuple[int],
+        ) -> Dict[str, Any]:
+        """
+        Request engine to reset environment and return specified observations.
+        """
+        request = {
+            self.RESET_KEY: 1,
+            self.OBSERVATION_KEY: requested_observation,
+        }
+        return self.request(request)

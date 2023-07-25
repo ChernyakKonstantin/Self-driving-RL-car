@@ -5,10 +5,10 @@ export var port: int = 9090
 export var repeat_action: int = 4
 # --------
 enum Request {
-	FRAME = 1, 
-	IS_CRASHED = 2, 
+	FRAME = 1,
+	IS_CRASHED = 2,
 	STEERING = 3,
-	SPEED = 4, 
+	SPEED = 4,
 	OBSTACLE_PROXEMITY = 5,  # Distance the closest object;
 	LIDAR = 6,
 }
@@ -29,6 +29,7 @@ const OBSERVATION_KEY = "observation"
 # --------
 onready var server = TCP_Server.new()
 onready var agent = $RLCarAgent
+onready var world = $World
 onready var step_counter: int = 0
 onready var have_connection: bool = false
 onready var connection: StreamPeerTCP
@@ -38,13 +39,13 @@ onready var request: Dictionary
 func _ready():
 	# Listen for incoming connections
 	server.listen(port, address)
-	
+
 	# Environment is not pausable while Agent and World is pausable.
 	set_pause_mode(2)
 	for child in get_children():
 		child.set_pause_mode(1)
-	
-	get_tree().set_pause(true) 
+
+	get_tree().set_pause(true)
 
 func _physics_process(_delta):
 	if not have_connection:
@@ -54,21 +55,24 @@ func _physics_process(_delta):
 			if request.has(ACTION_KEY):
 				agent.set_action(request[ACTION_KEY])
 				# Enable physics
-				get_tree().set_pause(false) 
+				get_tree().set_pause(false)
 				have_connection = true
 	if have_connection:
 		# Send observation if step is done
 		step_counter += 1
 		if step_counter % repeat_action == 0:
 			# Disable physics
-			get_tree().set_pause(true) 
+			get_tree().set_pause(true)
+#			if request.has(CONFIG_KEY):
+#				_configure(request[CONFIG_KEY])
+			if request.has(RESET_KEY):
+				_reset()
 			if request.has(OBSERVATION_KEY):
 				_send_response(request[OBSERVATION_KEY], connection)
 			request.clear()
 			agent.data_recorder.clear_storage()
 			connection.disconnect_from_host()
 			have_connection = false
-			
 
 # -------- helpers --------
 func _read_request(connection: StreamPeerTCP) -> Dictionary:
@@ -76,6 +80,14 @@ func _read_request(connection: StreamPeerTCP) -> Dictionary:
 	var request_data = connection.get_utf8_string(request_package_size)
 	var request = JSON.parse(request_data).result
 	return request
+
+func _reset():
+	world.reset()
+	agent.reset(world.get_initial_position())
+
+#func _configure(configuration: Dictionary):
+#	if configuration.has("repeat_action"):
+#		repeat_action = configuration["repeat_action"]
 
 func _send_response(observation_request: Array, connection: StreamPeerTCP) -> void:
 	connection.put_32(observation_request.size())
