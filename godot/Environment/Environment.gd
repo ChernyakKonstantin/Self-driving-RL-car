@@ -2,7 +2,7 @@ extends Node
 # --------
 export var address: String = "127.0.0.1"
 export var port: int = 9090
-export var repeat_action: int = 4
+export var repeat_action: int = 4  # TODO: make configurable
 # --------
 enum Request {
 	FRAME = 1,
