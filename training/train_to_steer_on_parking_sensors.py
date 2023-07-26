@@ -51,7 +51,7 @@ def train_to_steer_on_parking_sensors():
     # model.set_parameters("/home/cherniak/Self-driving-RL-car/train_to_steer_on_parking_sensors_PPO_1.zip")
     model.learn(
         total_timesteps=150000,
-        tb_log_name="parking_sensors_net_PPO",
+        tb_log_name="parking_sensors_net_no_termination_on_collision_PPO",
 )
     # model.save("/home/cherniak/Self-driving-RL-car/train_to_steer_on_parking_sensors_TD3_1.zip")
-    model.save("/home/cherniak/Self-driving-RL-car/train_to_steer_on_parking_sensors_parking_sensors_net_PPO_1.zip")
+    model.save("/home/cherniak/Self-driving-RL-car/train_to_steer_on_parking_sensors_parking_sensors_net_no_termination_on_collision_PPO_1.zip")
