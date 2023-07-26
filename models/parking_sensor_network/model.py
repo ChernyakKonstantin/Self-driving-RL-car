@@ -1,9 +1,11 @@
-from typing import Tuple, Dict
+from typing import Dict, Tuple
+
 import gymnasium as gym
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
+
 
 class ParkingSensorEncoder(nn.Module):
     def __init__(
@@ -15,6 +17,7 @@ class ParkingSensorEncoder(nn.Module):
             transformer_nhead: int = 1,
         ):
         super().__init__()
+        self.out_features = encoder_hidden_dim
         self.encoder = nn.Sequential(
             nn.Flatten(start_dim=2),
             nn.Linear(in_features * sequence_len, encoder_hidden_dim),
@@ -40,15 +43,64 @@ class ParkingSensorEncoder(nn.Module):
         # Shape: [batch_size, transformer_hidden_dim]
         return x[:, 0, :].squeeze(1)
 
-class ParkingSensorNetwork(nn.Module):
+class MultimodalEncoder(nn.Module):
     def __init__(
             self,
             parking_sensor_in_features: int = 1,
-            other_in_features: int = 1,
+            steering_in_features: int = 1,
             sequence_len: int = 4,
             parking_sensor_encoder_hidden_dim: int = 16,
             parking_sensor_transformer_hidden_dim: int = 64,
             parking_sensor_transformer_nhead: int = 1,
+            steering_encoder_hidden_dim: int = 2,
+            shared_network_hidden_dim: int = 8,
+    ) -> None:
+        super().__init__()
+        self.out_features = shared_network_hidden_dim
+        self.parking_sensor_encoder = ParkingSensorEncoder(
+            parking_sensor_in_features,
+            sequence_len,
+            parking_sensor_encoder_hidden_dim,
+            parking_sensor_transformer_hidden_dim,
+            parking_sensor_transformer_nhead,
+        )
+        self.steering_encoder = nn.Sequential(
+            nn.Linear(steering_in_features, steering_encoder_hidden_dim),
+            nn.ReLU(),
+            nn.BatchNorm1d(steering_encoder_hidden_dim),
+        )
+        self.shared_network = nn.Sequential(
+            nn.Linear(self.parking_sensor_encoder.out_features  + steering_encoder_hidden_dim,  shared_network_hidden_dim),
+            nn.ReLU(),
+            nn.Linear(shared_network_hidden_dim, shared_network_hidden_dim),
+            nn.ReLU(),
+            nn.BatchNorm1d(shared_network_hidden_dim),
+        )
+
+    def forward(self, x: Dict[str, torch.Tensor]) -> torch.Tensor:
+        # Shape: [batch_size, n_sensors, action_repeat, feature_dim]
+        parking_sensor = x["parking_sensor"]
+        # Shape: [batch_size, feature_dim]. It is steering and etc.
+        steering = x["steering"]
+        # Shape: [batch_size, parking_sensor_transformer_hidden_dim]
+        parking_sensor_features = self.parking_sensor_encoder(parking_sensor)
+        # Shape: [batch_size, steering_encoder_hidden_dim]
+        steering_features = self.steering_encoder(steering)
+        # Shape: [batch_size, parking_sensor_transformer_hidden_dim + steering_encoder_hidden_dim]
+        joined_data = torch.cat([parking_sensor_features, steering_features], dim=1)
+        # Shape: [batch_size, shared_network_hidden_dim]
+        return self.shared_network(joined_data)
+
+class ParkingSensorNetwork(nn.Module):
+    def __init__(
+            self,
+            parking_sensor_in_features: int = 1,
+            steering_in_features: int = 1,
+            sequence_len: int = 4,
+            parking_sensor_encoder_hidden_dim: int = 16,
+            parking_sensor_transformer_hidden_dim: int = 64,
+            parking_sensor_transformer_nhead: int = 1,
+            steering_encoder_hidden_dim: int = 2,
             shared_network_hidden_dim: int = 32,
             last_layer_dim_pi: int = 16,
             last_layer_dim_vf: int = 16,
@@ -59,31 +111,25 @@ class ParkingSensorNetwork(nn.Module):
         self.latent_dim_pi = last_layer_dim_pi
         self.latent_dim_vf = last_layer_dim_vf
 
-        self.parking_sensor_encoder = ParkingSensorEncoder(
+        self.encoder = MultimodalEncoder(
             parking_sensor_in_features,
+            steering_in_features,
             sequence_len,
             parking_sensor_encoder_hidden_dim,
             parking_sensor_transformer_hidden_dim,
             parking_sensor_transformer_nhead,
-        )
-
-        self.shared_network = nn.Sequential(
-            nn.Linear(parking_sensor_encoder_hidden_dim + other_in_features,  shared_network_hidden_dim),
-            nn.ReLU(),
-            nn.Linear(shared_network_hidden_dim,  shared_network_hidden_dim),
-            nn.ReLU(),
-            nn.Linear(shared_network_hidden_dim,  shared_network_hidden_dim),
-            nn.ReLU(),
+            steering_encoder_hidden_dim,
+            shared_network_hidden_dim,
         )
 
         self.policy_net = nn.Sequential(
-            nn.Linear(shared_network_hidden_dim, last_layer_dim_pi),
-            nn.ReLU()
+            nn.Linear(self.encoder.out_features, last_layer_dim_pi),
+            nn.ReLU(),
         )
 
         self.value_net = nn.Sequential(
-            nn.Linear(shared_network_hidden_dim, last_layer_dim_vf),
-            nn.ReLU()
+            nn.Linear(self.encoder.out_features, last_layer_dim_vf),
+            nn.ReLU(),
         )
 
     def forward(self, x: Dict[str, torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -92,28 +138,16 @@ class ParkingSensorNetwork(nn.Module):
             If all layers are shared, then ``latent_policy == latent_value``
         """
         # Shape: [batch_size, shared_network_hidden_dim]
-        features = self.forward_shared(x)
+        features = self.encoder(x)
         # Shape: [batch_size, last_layer_dim_pi], [batch_size, last_layer_dim_vf]
         return self.policy_net(features), self.value_net(features)
 
-    def forward_shared(self, x: Dict[str, torch.Tensor]) -> torch.Tensor:
-        # Shape: [batch_size, n_sensors, action_repeat, feature_dim]
-        parking_sensor = x["parking_sensor"]
-        # Shape: [batch_size, feature_dim]. It is steering and etc.
-        other = x["other"]
-        # Shape: [batch_size, parking_sensor_transformer_hidden_dim]
-        parking_sensor_features = self.parking_sensor_encoder(parking_sensor)
-        # Shape: [batch_size, parking_sensor_transformer_hidden_dim + other_in_features]
-        joined_data = torch.cat([parking_sensor_features, other], dim=1)
-        # Shape: [batch_size, shared_network_hidden_dim]
-        return self.shared_network(joined_data)
-
     def forward_actor(self, x: Dict[str, torch.Tensor]) -> torch.Tensor:
-        features = self.forward_shared(x)
+        features = self.encoder(x)
         return self.policy_net(features)
 
     def forward_critic(self, x: Dict[str, torch.Tensor]) -> torch.Tensor:
-        features = self.forward_shared(x)
+        features = self.encoder(x)
         return self.value_net(features)
 
 class ParkingSensorExtractor(BaseFeaturesExtractor):
@@ -125,17 +159,5 @@ class ParkingSensorExtractor(BaseFeaturesExtractor):
 
         self.key_order = None
 
-    def forward(self, observations) -> Dict[str, torch.Tensor]:
-        x = {}
-        if self.key_order is None:
-            self.key_order = list(observations.keys())
-
-        for key in self.key_order:
-            if key == "parking_sensor":
-                x[key] = observations[key]
-            else:
-                if "other" not in x:
-                    x["other"] = []
-                x["other"].append(observations[key])
-        x["other"] = torch.cat(x["other"], dim=1)
-        return x
+    def forward(self, observations: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+        return observations
