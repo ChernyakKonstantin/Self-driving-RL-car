@@ -19,6 +19,7 @@ class TrainToSteerEnv(gym.Env):
         repeat_action: int = 4,
         reward_values: Dict[str, float] = {"penalty": -100., "encouragement": 1.},
         episode_length: int = 500,
+        terminate_on_crash: bool = False,
     ):
         """
         image_size: Sequence of [n_frames, width, height, num_channels].
@@ -29,8 +30,9 @@ class TrainToSteerEnv(gym.Env):
         super().__init__()
         self.engine_client = engine_client
         self.repeat_action = repeat_action
-        self.episode_length = episode_length
         self.reward_values = reward_values
+        self.episode_length = episode_length
+        self.terminate_on_crash = terminate_on_crash
 
         # RL agent can implement its own observed data preprocessing.
         self.observation_space = spaces.Dict(
@@ -66,6 +68,7 @@ class TrainToSteerEnv(gym.Env):
         self.requested_observation = [
             Request.WHEEL_POSITION,
             Request.PARKING_SENSORS,
+            Request.IS_CRASHED,
         ]
         self._request_godot_step = partial(
             self.engine_client.request_step,
@@ -76,18 +79,25 @@ class TrainToSteerEnv(gym.Env):
             requested_observation=self.requested_observation,
         )
 
-    def reward_function(self, parking_sensor_data: bool) -> float:
-        return np.min(parking_sensor_data) * self.reward_values["encouragement"]
+    def reward_function(self, parking_sensor_data: List[List[int]], is_crashed: bool) -> float:
+        if self.terminate_on_crash and is_crashed:
+            return self.reward_values["penalty"]
+        else:
+            # Dense reward to encourage agent get far from obstacles.
+            return np.min(parking_sensor_data) * self.reward_values["encouragement"]
 
-    def _get_is_terminated(self) -> bool:
-        return self.step_counter >= self.episode_length
+    def _get_is_terminated(self, is_crashed) -> bool:
+        if self.terminate_on_crash:
+            return is_crashed
+        else:
+            return self.step_counter >= self.episode_length
 
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, dict]:
         self.state: Dict[str, Any] = self._request_godot_step(action={"steering_delta": action.item()})
         observation = self.observe(self.state)
-        terminated = self._get_is_terminated()
+        terminated = self._get_is_terminated(self.state["is_crashed"])
         truncated = False  # The environment does not support truncation
-        reward = self.reward_function(observation["parking_sensor"])
+        reward = self.reward_function(observation["parking_sensor"], self.state["is_crashed"])
         info = {}  # TODO if there is extra info to include
         self.step_counter += 1
         return observation, reward, terminated, truncated, info
