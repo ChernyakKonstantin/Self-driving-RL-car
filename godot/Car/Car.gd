@@ -33,7 +33,7 @@ func _configure_collision():
 	set_contact_monitor(true)
 	set_max_contacts_reported(4)
 	connect("body_entered", self, "_on_collision")
-	connect("body_exited", self, "_on_collsion_release")
+#	connect("body_exited", self, "_on_collsion_release")
 
 # -------- setters --------
 func set_sensors(sensors: NodePath):
@@ -77,5 +77,5 @@ func _calculate_steering():
 func _on_collision(_body):
 	is_collided = true
 	
-func _on_collision_release(_body):
-	is_collided = false
+#func _on_collision_release(_body):
+#	is_collided = false
