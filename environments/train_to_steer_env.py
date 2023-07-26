@@ -43,7 +43,7 @@ class TrainToSteerEnv(gym.Env):
                 ),
                 "parking_sensor": spaces.Box(
                     low=0,
-                    high=1,
+                    high=2,
                     shape=[8, self.repeat_action],  # TODO: pull first element from env
                     dtype=np.float32,
                 )

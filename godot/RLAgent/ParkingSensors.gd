@@ -1,6 +1,6 @@
 extends Spatial
 
-onready var max_distance: float = 1.0  # TODO: make configurable
+export var max_distance: float = 2.0  # TODO: make configurable
 
 func _ready():
 	for ray in get_children():

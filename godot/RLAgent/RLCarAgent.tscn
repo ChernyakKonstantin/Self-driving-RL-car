@@ -23,42 +23,42 @@ script = ExtResource( 5 )
 [node name="Front" type="RayCast" parent="Sensors/ParkingSensors"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0165759, 1.92878 )
 enabled = true
-cast_to = Vector3( 0, 0, 1 )
+cast_to = Vector3( 0, 0, 2 )
 
 [node name="Right" type="RayCast" parent="Sensors/ParkingSensors"]
 transform = Transform( -4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -0.816, 0.017, -0.018 )
 enabled = true
-cast_to = Vector3( 0, 0, 1 )
+cast_to = Vector3( 0, 0, 2 )
 
 [node name="Left" type="RayCast" parent="Sensors/ParkingSensors"]
 transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0.815801, 0.017, -0.018 )
 enabled = true
-cast_to = Vector3( 0, 0, 1 )
+cast_to = Vector3( 0, 0, 2 )
 
 [node name="FrontLeft" type="RayCast" parent="Sensors/ParkingSensors"]
 transform = Transform( 0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0.814066, 0.0165759, 1.92878 )
 enabled = true
-cast_to = Vector3( 0, 0, 1 )
+cast_to = Vector3( 0, 0, 2 )
 
 [node name="FrontRight" type="RayCast" parent="Sensors/ParkingSensors"]
 transform = Transform( 0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, -0.814, 0.017, 1.92857 )
 enabled = true
-cast_to = Vector3( 0, 0, 1 )
+cast_to = Vector3( 0, 0, 2 )
 
 [node name="Rear" type="RayCast" parent="Sensors/ParkingSensors"]
 transform = Transform( -1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -0.004444, 0.0165759, -2.03307 )
 enabled = true
-cast_to = Vector3( 0, 0, 1 )
+cast_to = Vector3( 0, 0, 2 )
 
 [node name="RearRight" type="RayCast" parent="Sensors/ParkingSensors"]
 transform = Transform( -0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, -0.707107, -0.81851, 0.0165759, -2.03307 )
 enabled = true
-cast_to = Vector3( 0, 0, 1 )
+cast_to = Vector3( 0, 0, 2 )
 
 [node name="RearLeft" type="RayCast" parent="Sensors/ParkingSensors"]
 transform = Transform( -0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, -0.707107, 0.809556, 0.017, -2.03286 )
 enabled = true
-cast_to = Vector3( 0, 0, 1 )
+cast_to = Vector3( 0, 0, 2 )
 
 [node name="RGBCameras" type="Spatial" parent="Sensors"]
 script = ExtResource( 7 )
