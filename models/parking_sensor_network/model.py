@@ -7,10 +7,19 @@ import torch.nn.functional as F
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 
 
+class ParkingSensorsBatchNorm1d(nn.BatchNorm1d):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        batch_size, seq_len, n_features = x.shape
+        x = x.reshape(batch_size, seq_len * n_features)
+        x = super().forward(x)
+        x = x.reshape(batch_size, seq_len, n_features)
+        return x
+
 class ParkingSensorEncoder(nn.Module):
     def __init__(
             self,
             in_features: int = 1,
+            n_sensors: int = 8,
             sequence_len: int = 4,
             encoder_hidden_dim: int = 16,
             transformer_hidden_dim: int = 64,
@@ -21,8 +30,10 @@ class ParkingSensorEncoder(nn.Module):
         self.encoder = nn.Sequential(
             nn.Flatten(start_dim=2),
             nn.Linear(in_features * sequence_len, encoder_hidden_dim),
+            ParkingSensorsBatchNorm1d(n_sensors * encoder_hidden_dim),
             nn.ReLU(),
             nn.Linear(encoder_hidden_dim, encoder_hidden_dim),
+            ParkingSensorsBatchNorm1d(n_sensors * encoder_hidden_dim),
             nn.ReLU(),
         )
         self.transformer = nn.TransformerEncoderLayer(
@@ -48,6 +59,7 @@ class MultimodalEncoder(nn.Module):
             self,
             parking_sensor_in_features: int = 1,
             steering_in_features: int = 1,
+            n_sensors = 8,
             sequence_len: int = 4,
             parking_sensor_encoder_hidden_dim: int = 16,
             parking_sensor_transformer_hidden_dim: int = 64,
@@ -59,6 +71,7 @@ class MultimodalEncoder(nn.Module):
         self.out_features = shared_network_hidden_dim
         self.parking_sensor_encoder = ParkingSensorEncoder(
             parking_sensor_in_features,
+            n_sensors,
             sequence_len,
             parking_sensor_encoder_hidden_dim,
             parking_sensor_transformer_hidden_dim,
@@ -66,15 +79,16 @@ class MultimodalEncoder(nn.Module):
         )
         self.steering_encoder = nn.Sequential(
             nn.Linear(steering_in_features, steering_encoder_hidden_dim),
-            nn.ReLU(),
             nn.BatchNorm1d(steering_encoder_hidden_dim),
+            nn.ReLU(),
         )
         self.shared_network = nn.Sequential(
             nn.Linear(self.parking_sensor_encoder.out_features  + steering_encoder_hidden_dim,  shared_network_hidden_dim),
+            nn.BatchNorm1d(shared_network_hidden_dim),
             nn.ReLU(),
             nn.Linear(shared_network_hidden_dim, shared_network_hidden_dim),
-            nn.ReLU(),
             nn.BatchNorm1d(shared_network_hidden_dim),
+            nn.ReLU(),
         )
 
     def forward(self, x: Dict[str, torch.Tensor]) -> torch.Tensor:
@@ -96,6 +110,7 @@ class ParkingSensorNetwork(nn.Module):
             self,
             parking_sensor_in_features: int = 1,
             steering_in_features: int = 1,
+            n_sensors: int = 8,
             sequence_len: int = 4,
             parking_sensor_encoder_hidden_dim: int = 16,
             parking_sensor_transformer_hidden_dim: int = 64,
@@ -114,6 +129,7 @@ class ParkingSensorNetwork(nn.Module):
         self.encoder = MultimodalEncoder(
             parking_sensor_in_features,
             steering_in_features,
+            n_sensors,
             sequence_len,
             parking_sensor_encoder_hidden_dim,
             parking_sensor_transformer_hidden_dim,
