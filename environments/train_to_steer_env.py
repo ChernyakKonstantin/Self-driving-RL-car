@@ -116,7 +116,6 @@ class TrainToSteerEnv(gym.Env):
         return observation
 
     def reset(self, *args, **kwargs) -> np.ndarray:
-        print(f"Reset is requested. Current step is: {self.step_counter}")
         self.step_counter = 0
         self.state: Dict[str, Any] = self._request_godot_reset()
         info = {}  # TODO if there is extra info to include
