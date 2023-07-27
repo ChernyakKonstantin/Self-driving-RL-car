@@ -51,6 +51,7 @@ func set_action(action: Dictionary) -> void:
 func reset(new_position: Spatial):
 	car.set_global_translation(new_position.get_global_translation())
 	car.set_global_rotation(new_position.get_global_rotation())
+	car.relative_steering = 0
 	car.is_collided = false
 	for i in range(repeat_action):
 		data_recorder.record()
