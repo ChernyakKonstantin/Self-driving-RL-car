@@ -23,7 +23,7 @@ func _ready():
 	_configure_collision()
 
 func __physics_process(_delta):
-	# Method to be called in agent. 
+	# Method to be called in agent.
 	# Double underline prefix is used to avoid the method call in GODOT loop.
 	_calculate_steering()
 	_calculate_engine_force()
@@ -58,7 +58,7 @@ func get_is_crashed() -> bool:
 	return is_collided
 
 func get_steering() -> float:
-	return steering
+	return relative_steering
 
 func get_speed() -> float:
 	# TODO: Implement
@@ -76,6 +76,6 @@ func _calculate_steering():
 # -------- events --------
 func _on_collision(_body):
 	is_collided = true
-	
+
 #func _on_collision_release(_body):
 #	is_collided = false

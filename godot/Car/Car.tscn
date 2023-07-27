@@ -13,7 +13,7 @@ script = ExtResource( 1 )
 [node name="SensorPlaceholder" type="RemoteTransform" parent="."]
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
-transform = Transform( 0.814, 0, 0, 0, 0.58, 0, 0, 0, 2.033, 0, 0.842136, 0 )
+transform = Transform( 0.825, 0, 0, 0, 0.59, 0, 0, 0, 2.04, 0, 0.842136, 0 )
 shape = SubResource( 1 )
 
 [node name="car" parent="." instance=ExtResource( 3 )]
