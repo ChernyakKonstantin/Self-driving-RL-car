@@ -30,6 +30,7 @@ const OBSERVATION_KEY = "observation"
 onready var server = TCP_Server.new()
 onready var agent = $RLCarAgent
 onready var world = $World
+onready var server_configuration = $ServerConfiguration
 
 onready var have_connection: bool = false
 onready var connection: StreamPeerTCP
@@ -38,13 +39,14 @@ onready var request: Dictionary
 # -------- built-ins --------
 func _ready():
 	agent.connect("done_action", self, "_on_done_action")
-	# Listen for incoming connections
-	server.listen(port, address)
-
-	# Environment is not pausable while Agent and World is pausable.
+	server_configuration.connect("start_server", self, "_on_start_server")
+	
+	# Environment and server_configuration is not pausable 
+	# while Agent and World is pausable.
 	set_pause_mode(2)
 	for child in get_children():
-		child.set_pause_mode(1)
+		if child.get_name() != "ServerConfiguration":
+			child.set_pause_mode(1)
 
 	get_tree().set_pause(true)
 
@@ -78,12 +80,7 @@ func _on_reset(request: Dictionary, connection: StreamPeerTCP):
 func _on_action(request: Dictionary, connection: StreamPeerTCP):
 	agent.set_action(request[ACTION_KEY])
 	if get_tree().is_paused():
-		get_tree().set_pause(false)  # Enable physics
-
-func _on_done_action():
-	get_tree().set_pause(true)
-	_send_response(request[OBSERVATION_KEY], connection)
-	_on_after_send_response(connection)
+		get_tree().set_pause(false)  # Enable physics	
 
 func _on_after_send_response(connection: StreamPeerTCP):
 	request.clear()
@@ -146,3 +143,14 @@ func _put_named_image(name: String, value: Dictionary, connection: StreamPeerTCP
 				connection.put_32(image_data.size()) # Image length in bytes
 				connection.put_data(image_data)
 
+
+# -------- events handlers --------
+func _on_done_action():
+	get_tree().set_pause(true)
+	_send_response(request[OBSERVATION_KEY], connection)
+	_on_after_send_response(connection)
+	
+func _on_start_server(port: int, address: String):
+	# Listen for incoming connections
+	server.listen(port, address)
+	print("Listen on address: ", address, ", port: ", port)

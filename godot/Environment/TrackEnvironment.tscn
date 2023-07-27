@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://RLAgent/RLCarAgent.tscn" type="PackedScene" id=1]
 [ext_resource path="res://World/Track.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Environment/Environment.gd" type="Script" id=3]
+[ext_resource path="res://Environment/server_configuration/ServerConfiguration.tscn" type="PackedScene" id=4]
 
 [node name="Environment" type="Node"]
 script = ExtResource( 3 )
@@ -21,6 +22,8 @@ transform = Transform( 0.0433083, -0.500172, 0.86484, 0.0155223, 0.865887, 0.5, 
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
 transform = Transform( 1, 0, 0, 0, 0.284584, 0.958651, 0, -0.958651, 0.284584, 0, 9.11547, 0 )
+
+[node name="ServerConfiguration" parent="." instance=ExtResource( 4 )]
 
 [editable path="RLCarAgent"]
 [editable path="RLCarAgent/Car"]
