@@ -6,6 +6,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 
+def get_encoder_weights(path):
+    checkpoint = torch.load(path)
+    state_dict = checkpoint["state_dict"]
+    return {".".join(k.split(".")[2:]): v for k, v in state_dict.items() if k.startswith("icm.encoder")}
 
 class ParkingSensorsBatchNorm1d(nn.BatchNorm1d):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -116,9 +120,10 @@ class ParkingSensorNetwork(nn.Module):
             parking_sensor_transformer_hidden_dim: int = 64,
             parking_sensor_transformer_nhead: int = 1,
             steering_encoder_hidden_dim: int = 2,
-            shared_network_hidden_dim: int = 32,
+            shared_network_hidden_dim: int = 8,
             last_layer_dim_pi: int = 16,
             last_layer_dim_vf: int = 16,
+            pretrained_encoder_weights_path: str = None
     ):
         super().__init__()
 
@@ -137,6 +142,10 @@ class ParkingSensorNetwork(nn.Module):
             steering_encoder_hidden_dim,
             shared_network_hidden_dim,
         )
+
+        self.pretrained_encoder_weights_path = pretrained_encoder_weights_path
+        if self.pretrained_encoder_weights_path is not None:
+            self.encoder.load_state_dict(get_encoder_weights(self.pretrained_encoder_weights_path))
 
         self.policy_net = nn.Sequential(
             nn.Linear(self.encoder.out_features, last_layer_dim_pi),
