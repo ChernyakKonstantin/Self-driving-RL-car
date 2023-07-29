@@ -14,10 +14,15 @@ from policies import CustomActorCriticPolicy
 ADDRESS = "localhost"
 PORT = 9091
 CHUNK_SIZE = 4096
-PRETRAINED_ENCODER_WEIGHTS_PATTH = "/home/cherniak/Self-driving-RL-car/logs/pretrain_parking_sensor_encoder_with_icm/lightning_logs/version_0/checkpoints/epoch=49-step=3350.ckpt"
+TERMINATE_ON_CRASH = True
+
+PRETRAINED_ENCODER_WEIGHTS_PATH = "/home/cherniak/Self-driving-RL-car/logs/pretrain_parking_sensor_encoder_with_icm/lightning_logs/version_0/checkpoints/epoch=49-step=3350.ckpt"
+FREEZE_ENCODER = True
+
 LOG_DIR = "/home/cherniak/Self-driving-RL-car/logs/train_to_steer_on_parking_sensors/termination_on_collision"
-LOG_NAME = "parking_sensors_net_pretrained_with_icm_encoder_PPO"
-SUFFIX = "_1"
+LOG_NAME = "parking_sensors_net_pretrained_with_icm_frozen_encoder_PPO"
+SUFFIX = "_2"
+
 TOTAL_TIMESTEPS = 150000
 N_STEPS = 4096
 CHECKPOINT_FREQUENCY = 5200
@@ -27,11 +32,15 @@ def train_to_steer_on_parking_sensors():
     env_fn = partial(
         TrainToSteerEnv,
         engine_client=GodotClient(engine_address=(ADDRESS, PORT), chunk_size=CHUNK_SIZE),
-        terminate_on_crash=True,
+        terminate_on_crash=TERMINATE_ON_CRASH,
         wheel_rotation_limit_per_step=(-1 / 15, 1/15),
     )
     env = make_vec_env(env_fn, n_envs=1)
-    custom_network_builder = partial(ParkingSensorNetwork, pretrained_encoder_weights_path=PRETRAINED_ENCODER_WEIGHTS_PATTH)
+    custom_network_builder = partial(
+        ParkingSensorNetwork,
+        pretrained_encoder_weights_path=PRETRAINED_ENCODER_WEIGHTS_PATH,
+        freeze_encoder=FREEZE_ENCODER,
+    )
 
     # TODO: try masacable ppo and disretized action to enable out-of-box masking
 
@@ -52,7 +61,7 @@ def train_to_steer_on_parking_sensors():
         seed=0,
         tensorboard_log=LOG_DIR,
     )
-    # model.set_parameters("/home/cherniak/Self-driving-RL-car/train_to_steer_on_parking_sensors_PPO_1.zip")
+    model.set_parameters("/home/cherniak/Self-driving-RL-car/logs/train_to_steer_on_parking_sensors/termination_on_collision/parking_sensors_net_pretrained_with_icm_frozen_encoder_PPO_1/checkpoints/rl_model_26000_steps.zip")
     model.learn(
         callback=CheckpointCallback(
             save_freq = CHECKPOINT_FREQUENCY,

@@ -123,9 +123,12 @@ class ParkingSensorNetwork(nn.Module):
             shared_network_hidden_dim: int = 8,
             last_layer_dim_pi: int = 16,
             last_layer_dim_vf: int = 16,
-            pretrained_encoder_weights_path: str = None
+            pretrained_encoder_weights_path: str = None,
+            freeze_encoder: bool = False,
     ):
         super().__init__()
+        self.pretrained_encoder_weights_path = pretrained_encoder_weights_path
+        self.freeze_encoder = freeze_encoder
 
         # Save dim, used to create the distributions
         self.latent_dim_pi = last_layer_dim_pi
@@ -143,7 +146,6 @@ class ParkingSensorNetwork(nn.Module):
             shared_network_hidden_dim,
         )
 
-        self.pretrained_encoder_weights_path = pretrained_encoder_weights_path
         if self.pretrained_encoder_weights_path is not None:
             self.encoder.load_state_dict(get_encoder_weights(self.pretrained_encoder_weights_path))
 
@@ -163,7 +165,11 @@ class ParkingSensorNetwork(nn.Module):
             If all layers are shared, then ``latent_policy == latent_value``
         """
         # Shape: [batch_size, shared_network_hidden_dim]
-        features = self.encoder(x)
+        if self.freeze_encoder:
+            with torch.no_grad():
+                features = self.encoder(x)
+        else:
+            features = self.encoder(x)
         # Shape: [batch_size, last_layer_dim_pi], [batch_size, last_layer_dim_vf]
         return self.policy_net(features), self.value_net(features)
 
