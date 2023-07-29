@@ -14,7 +14,7 @@ script = ExtResource( 1 )
 [node name="Sensors" type="Spatial" parent="."]
 
 [node name="LIDAR" parent="Sensors" instance=ExtResource( 2 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.32895, 0.445837 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.51054, 0.445837 )
 
 [node name="ParkingSensors" type="Spatial" parent="Sensors"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.340226, 0 )
