@@ -71,6 +71,7 @@ func _calculate_engine_force():
 
 func _calculate_steering():
 	relative_steering = clamp(relative_steering + steering_delta, -1, 1)
+	$SteeringWheelSprite.set_rotation_degrees(-relative_steering * 90)
 	steering = relative_steering * car_parameters["max_steering_angle"]
 
 # -------- events --------

@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Car/Car.gd" type="Script" id=1]
 [ext_resource path="res://Car/assets/wheel.glb" type="PackedScene" id=2]
 [ext_resource path="res://Car/assets/car.glb" type="PackedScene" id=3]
+[ext_resource path="res://Car/assets/Car-Steering-Wheel-PNG-Images.png" type="Texture" id=4]
 
 [sub_resource type="BoxShape" id=1]
 
@@ -62,5 +63,10 @@ damping_relaxation = 2.0
 
 [node name="wheel" parent="back_right_wheel" instance=ExtResource( 2 )]
 transform = Transform( -2.18557e-08, -0.5, 0, 0.5, -2.18557e-08, 0, 0, 0, 0.5, 0, 0, 0 )
+
+[node name="SteeringWheelSprite" type="Sprite" parent="."]
+position = Vector2( 419, 119 )
+scale = Vector2( 0.28625, 0.28625 )
+texture = ExtResource( 4 )
 
 [editable path="car"]
