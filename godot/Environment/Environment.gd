@@ -54,11 +54,12 @@ func _physics_process(_delta):
 	if not have_connection and server.is_connection_available():
 		connection = server.take_connection()
 		request = _read_request(connection)
-		have_connection = true
-		if request.has(RESET_KEY):
-			_on_reset(request, connection)
-		elif request.has(ACTION_KEY):
-			_on_action(request, connection)
+		if not request.empty():
+			have_connection = true
+			if request.has(RESET_KEY):
+				_on_reset(request, connection)
+			elif request.has(ACTION_KEY):
+				_on_action(request, connection)
 
 # -------- helpers --------
 func _read_request(connection: StreamPeerTCP) -> Dictionary:
