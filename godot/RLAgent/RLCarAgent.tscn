@@ -1,9 +1,9 @@
 [gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://RLAgent/RLCarAgent.gd" type="Script" id=1]
-[ext_resource path="res://LIDAR/LIDAR.tscn" type="PackedScene" id=2]
+[ext_resource path="res://addons/reinforcement_learning/Sensors3D/LIDAR/LIDAR.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Car/Car.tscn" type="PackedScene" id=3]
-[ext_resource path="res://RGBCamera/RGBCamera.tscn" type="PackedScene" id=4]
+[ext_resource path="res://addons/reinforcement_learning/Sensors3D/RGBCamera/RGBCamera.tscn" type="PackedScene" id=4]
 [ext_resource path="res://RLAgent/ParkingSensors.gd" type="Script" id=5]
 [ext_resource path="res://RLAgent/DataRecorder.gd" type="Script" id=6]
 [ext_resource path="res://RLAgent/RGBCameras.gd" type="Script" id=7]

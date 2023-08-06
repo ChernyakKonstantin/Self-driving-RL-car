@@ -9,7 +9,7 @@ enum Request {
 	IS_CRASHED = 2,
 	STEERING = 3,
 	SPEED = 4,
-	PARKING_SENSORS = 5,  # Distance the closest object;
+	PARKING_SENSORS = 5,
 	LIDAR = 6,
 }
 
@@ -31,8 +31,6 @@ func _ready():
 	get_tree().set_pause(true)
 	communication.set_pause_mode(2)
 
-# -------- helpers --------
-
 #func _configure(configuration: Dictionary):
 #	if configuration.has("repeat_action"):
 #		repeat_action = configuration["repeat_action"]
@@ -40,9 +38,11 @@ func _ready():
 func _reset():
 	world.reset()
 	agent.reset(world.sample_initial_position())
+	for i in range(repeat_action):
+		agent.data_recorder.record()
 	
 func _step(action):
-	agent.set_action(action)
+	agent.step(action)
 	yield(._step(action), "completed")
 	gui.set_steering_wheel_angle(agent.car.relative_steering)
 

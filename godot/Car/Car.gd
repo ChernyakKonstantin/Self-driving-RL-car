@@ -22,9 +22,7 @@ func _ready():
 	set_car_parameters(car_parameters)
 	_configure_collision()
 
-func __physics_process(_delta):
-	# Method to be called in agent.
-	# Double underline prefix is used to avoid the method call in GODOT loop.
+func _physics_process(_delta):
 	_calculate_steering()
 	_calculate_engine_force()
 
