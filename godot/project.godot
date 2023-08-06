@@ -8,10 +8,38 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "Node",
+"class": "Communication",
+"language": "GDScript",
+"path": "res://addons/reinforcement_learning/communication.gd"
+}, {
+"base": "Node",
+"class": "PhysicsFramesTimer",
+"language": "GDScript",
+"path": "res://addons/reinforcement_learning/physics_frames_timer.gd"
+}, {
+"base": "Spatial",
+"class": "RLAgent",
+"language": "GDScript",
+"path": "res://addons/reinforcement_learning/rl_agent.gd"
+}, {
+"base": "Spatial",
+"class": "RLEnvironment",
+"language": "GDScript",
+"path": "res://addons/reinforcement_learning/rl_environment.gd"
+} ]
+_global_script_class_icons={
+"Communication": "res://addons/reinforcement_learning/icons/custom_node_icon.png",
+"PhysicsFramesTimer": "res://addons/reinforcement_learning/icons/custom_node_icon.png",
+"RLAgent": "res://addons/reinforcement_learning/icons/agent_node_icon.png",
+"RLEnvironment": "res://addons/reinforcement_learning/icons/env_node_icon.png"
+}
+
 [application]
 
 config/name="TrainToSteer"
-run/main_scene="res://Environment/TrackEnvironment.tscn"
+run/main_scene="res://Environment/TrackEnvironment/Environment.tscn"
 config/icon="res://icon.png"
 
 [display]
@@ -20,6 +48,10 @@ window/size/width=1440
 window/size/height=480
 window/size/resizable=false
 window/vsync/use_vsync=false
+
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/reinforcement_learning/plugin.cfg" )
 
 [global]
 
