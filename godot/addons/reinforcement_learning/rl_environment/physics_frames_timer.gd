@@ -23,3 +23,6 @@ func start():
 	_counter = 0	
 	is_started = true
 	return self
+	
+func set_limit(new_limit: int):
+	_limit = new_limit

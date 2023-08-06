@@ -57,12 +57,15 @@ func _reset():
 # Handle incoming connection
 func _on_got_connection(request: Dictionary):
 	if request.has(RESET_KEY):
-		yield(_reset(), "completed")
+		_reset()
 	elif request.has(ACTION_KEY):
 		yield(_step(request[ACTION_KEY]), "completed")
-	_send_response(request[OBSERVATION_KEY])
+	elif request.has(CONFIG_KEY):
+		_configure(request[CONFIG_KEY])
+	if request.has(OBSERVATION_KEY):
+		_send_response(request[OBSERVATION_KEY])
+		_after_send_response()
 	communication.close()
-	_after_send_response()
 
 # One should override the method in his own subclass.
 # Generally, the method should send state with help of `communication` object.
@@ -71,4 +74,8 @@ func _send_response(observation_request: Array):
 
 # Optional method to perform additional logic after response is sent.
 func _after_send_response():
+	pass
+
+# Optional method to perform additional logic on configuration
+func _configure(configuration_request: Dictionary):
 	pass

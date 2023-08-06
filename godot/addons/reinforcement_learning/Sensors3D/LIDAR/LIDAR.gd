@@ -2,11 +2,11 @@
 #tool
 extends Spatial
 
-export var horizontal_resolution: float = 2 # Degrees
-export var vertical_resolution: float = 2 # Degrees
+export var horizontal_resolution: float = 1 # Degrees
+export var vertical_resolution: float = 1 # Degrees
 export var horizontal_fov: float = 120 # Degrees
 export var vertical_fov: float = 30 # Degrees
-export var ray_max_len: float = 100 # Meters
+export var ray_max_len: float = 1000 # Meters
 
 #func _debug_draw_lidar_range():
 #	var visual = ImmediateGeometry.new()
@@ -63,5 +63,28 @@ func get_data() -> Array:
 		distances.append([float(rotation.y), float(rotation.x), float(distance)])
 	return distances
 
-
-
+func configure(lidar_config: Dictionary):
+	var recreate: bool = false
+	if "horizontal_resolution" in lidar_config.keys():
+		horizontal_resolution = lidar_config["horizontal_resolution"]
+		recreate = true
+	if "vertical_resolution" in lidar_config.keys():
+		vertical_resolution = lidar_config["vertical_resolution"]
+		recreate = true
+	if "horizontal_fov" in lidar_config.keys():
+		horizontal_fov = lidar_config["horizontal_fov"]
+		recreate = true
+	if "vertical_fov" in lidar_config.keys():
+		vertical_fov = lidar_config["vertical_fov"]
+		recreate = true
+	if "ray_max_len" in lidar_config.keys():
+		ray_max_len = lidar_config["ray_max_len"]
+	
+	if recreate:
+		_delete_rays()
+		_create()
+	
+func _delete_rays():
+	for ray in get_children():
+		remove_child(ray)
+		ray.queue_free()

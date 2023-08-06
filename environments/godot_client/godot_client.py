@@ -8,8 +8,6 @@ from typing import Any, Dict, Tuple
 import numpy as np
 from PIL import Image
 
-from .enums import DataType
-
 
 class GodotClient:
     STATUS_KEY = "status"
@@ -42,43 +40,10 @@ class GodotClient:
         value = np.frombuffer(raw_value, dtype=np.int32)[0]
         return data[4:], value
 
-    def _get_float32(self, data: bytes) -> Tuple[bytes, float]:
-        raw_value = data[:4]
-        value = np.frombuffer(raw_value, dtype=np.float32)[0]
-        return data[4:], value
-
     def _get_json(self, data: bytes) -> Tuple[bytes, Dict[str, Any]]:
         data, buffer_size = self._get_int32(data)
         raw_value = data[:buffer_size]
         value = json.loads(raw_value.decode("utf-8"))
-        return data[buffer_size:], value
-
-    def _get_string(self, data: bytes) -> Tuple[bytes, str]:
-        data, buffer_size = self._get_int32(data)
-        raw_value = data[:buffer_size]
-        value = raw_value.decode()
-        return data[buffer_size:], value
-
-    def _get_named_images(self, data: bytes):
-        values = defaultdict(list)
-
-        data, number_of_keys = self._get_int32(data)
-        for _ in range(number_of_keys):
-            data, key = self._get_string(data)
-            data, number_of_images = self._get_int32(data)
-            for _ in range(number_of_images):
-                data, buffer_size = self._get_int32(data)
-                raw_value = data[:buffer_size]
-                value = np.frombuffer(raw_value, dtype=np.uint8)
-                value = value.reshape(self.IMAGE_DIMS)
-                values[key].append(value)
-                data = data[buffer_size:]
-        return data, values
-
-    def _get_array(self, data: bytes):
-        data, buffer_size = self._get_int32(data)
-        raw_value = data[:buffer_size]
-        value = np.frombuffer(raw_value, dtype=np.float32)
         return data[buffer_size:], value
 
     def _get_data_from_stream(self, connection: socket.socket) -> bytes:
@@ -92,29 +57,18 @@ class GodotClient:
 
     def _get_response(self, connection: socket.socket) -> Dict[str, Any]:
         data = self._get_data_from_stream(connection)
-        response = {}
-        data, elements_in_message = self._get_int32(data)
-        for _ in range(elements_in_message):
-            data, key = self._get_string(data)
-            data, data_type = self._get_int32(data)
-            if data_type == DataType.INT32:
-                data, response[key] = self._get_int32(data)
-            elif data_type == DataType.FLOAT32:
-                data, response[key] = self._get_float32(data)
-            elif data_type == DataType.JSON:
-                data, response[key] = self._get_json(data)
-            elif data_type == DataType.NAMED_IMAGE:
-                data, response[key] = self._get_named_images(data)
-            else:
-                raise ValueError(f"Unknown data type: {data_type}")
-        return response
+        data, respose_json = self._get_json(data)
+        return respose_json
 
     # TODO: implement timeout and return False if timeout is exceeded.
-    def request(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    def request(self, request: Dict[str, Any], response_is_required: bool = True) -> Dict[str, Any]:
         request_bytes = json.dumps(request).encode("utf-8")
         with socket.create_connection(self.engine_address) as connection:
             connection.sendall(request_bytes)
-            response = self._get_response(connection)
+            if response_is_required:
+                response = self._get_response(connection)
+            else:
+                response = None
         return response
 
     # # TODO subject of changes
@@ -130,7 +84,7 @@ class GodotClient:
         Configure the engine.
         """
         request = {self.CONFIG_KEY: config}
-        return self.request(request)
+        return self.request(request, response_is_required=False)
 
     def request_step(
             self,

@@ -13,13 +13,11 @@ onready var sensor_placeholder = $SensorPlaceholder
 
 
 # -------- parameters --------
-var car_parameters = {
-	"max_steering_angle": 0.8  # I think 0.8 is cosine value of angle the wheel turn at
-}
+var max_steering_angle =  0.8  # I think 0.8 is cosine value of angle the wheel turn at
+var max_engine_force = 30
 
 # -------- built-ins --------
 func _ready():
-	set_car_parameters(car_parameters)
 	_configure_collision()
 
 func _physics_process(_delta):
@@ -35,13 +33,6 @@ func _configure_collision():
 # -------- setters --------
 func set_sensors(sensors: NodePath):
 	sensor_placeholder.set_remote_node(sensors)
-
-func set_car_parameters(overriden_car_parameters: Dictionary):
-	for key in overriden_car_parameters.keys():
-		car_parameters[key] = overriden_car_parameters[key]
-	if "mass" in car_parameters.keys():
-		mass = car_parameters["mass"]
-		weight = car_parameters["mass"] * 9.8
 
 func set_steering_delta(value: float):
 	steering_delta = value
@@ -64,12 +55,18 @@ func get_speed() -> float:
 # -------- helpers --------
 func _calculate_engine_force():
 	# TODO: implement
-	engine_force = 30
+	engine_force = max_engine_force
 
 func _calculate_steering():
 	relative_steering = clamp(relative_steering + steering_delta, -1, 1)
-	steering = relative_steering * car_parameters["max_steering_angle"]
+	steering = relative_steering * max_steering_angle
 
+func configure(car_config: Dictionary):
+	if "max_steering_angle" in car_config.keys():
+		max_steering_angle = car_config["max_steering_angle"]
+	if "max_engine_force" in car_config.keys():
+		max_engine_force = car_config["max_engine_force"]
+		
 # -------- events --------
 func _on_collision(_body):
 	is_collided = true

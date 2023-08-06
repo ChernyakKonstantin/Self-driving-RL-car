@@ -66,6 +66,11 @@ func _send_response(observation_request: Array):
 	communication.put_json(response_json)
 #	communication.put_named_image(frames, "cameras")
 	
-	
-	
-	
+func _configure(configuration_request: Dictionary):
+	if "agent" in configuration_request.keys():
+		agent.configure(configuration_request["agent"])
+	if "environment" in configuration_request.keys():
+		var env_config = configuration_request["environment"]
+		if "repeat_action" in env_config.keys():
+			repeat_action = env_config["repeat_action"]
+			physics_frames_timer.set_limit(repeat_action)

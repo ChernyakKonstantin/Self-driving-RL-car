@@ -4,6 +4,7 @@ extends RLAgent
 
 onready var car = $Car
 onready var data_recorder = $DataRecorder
+onready var lidar = $Sensors/LIDAR
 
 # -------- built-ins --------
 func _ready():
@@ -38,3 +39,9 @@ func reset(new_position: Spatial):
 	car.set_global_rotation(new_position.get_global_rotation())
 	car.relative_steering = 0
 	car.is_collided = false
+
+func configure(agent_config: Dictionary):
+	if "lidar" in agent_config.keys():
+		lidar.configure(agent_config["lidar"])
+	if "car" in agent_config.keys():
+		car.configure(agent_config["car"])
