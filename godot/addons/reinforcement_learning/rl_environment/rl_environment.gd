@@ -1,5 +1,5 @@
 extends Spatial
-class_name RLEnvironment, "icons/env_node_icon.png"
+class_name RLEnvironment, "../icons/env_node_icon.png"
 
 const STATUS_KEY = "status"
 const CONFIG_KEY = "config"
@@ -11,17 +11,21 @@ const OBSERVATION_KEY = "observation"
 onready var repeat_action: int = 4  # TODO: make configurable
 
 # Timer in terms of physics frames.
-onready var physics_frame_counter = $PhysicsFramesTimer
+onready var physics_frames_timer = PhysicsFramesTimer.new(repeat_action)
 
 # Communication server to handle request via TCP protocol.
-onready var communication = $Communication
+onready var communication = Communication.new()
 
 func _ready():
 	get_tree().set_pause(true)
 	set_pause_mode(2)
-	physics_frame_counter.set_pause_mode(2)
-	communication.set_pause_mode(2)
 	communication.connect("got_connection", self, "_on_got_connection")
+
+func _process(delta):
+	communication.server_poll()
+
+func _physics_process(delta):
+	physics_frames_timer.step()
 
 # One can extend the method to perform additional logic before or after or override it.
 # Generally, the method enables physics processing to emulate real-time interaction.  
@@ -36,12 +40,13 @@ func _ready():
 # 	func _step(action):
 # 		agent.set_action(action)
 # 		get_tree().set_pause(false)  # Enable physics	
-# 		yield(physics_frame_counter.start(), "timer_end")
+# 		yield(physics_frames_timer.start(), "timer_end")
 # 		get_tree().set_pause(true)  # Disable physics	
 # ```
 func _step(action):
 	get_tree().set_pause(false)  # Enable physics
-	yield(physics_frame_counter.start(), "timer_end")
+	physics_frames_timer.start()
+	yield(physics_frames_timer, "timer_end")
 	get_tree().set_pause(true)  # Disable physics
 	
 # One should override the method in his own subclass.

@@ -9,15 +9,15 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "Node",
+"base": "Object",
 "class": "Communication",
 "language": "GDScript",
-"path": "res://addons/reinforcement_learning/communication.gd"
+"path": "res://addons/reinforcement_learning/rl_environment/communication.gd"
 }, {
-"base": "Node",
+"base": "Object",
 "class": "PhysicsFramesTimer",
 "language": "GDScript",
-"path": "res://addons/reinforcement_learning/physics_frames_timer.gd"
+"path": "res://addons/reinforcement_learning/rl_environment/physics_frames_timer.gd"
 }, {
 "base": "Spatial",
 "class": "RLAgent",
@@ -25,14 +25,20 @@ _global_script_classes=[ {
 "path": "res://addons/reinforcement_learning/rl_agent.gd"
 }, {
 "base": "Spatial",
+"class": "RLEnvWorld",
+"language": "GDScript",
+"path": "res://addons/reinforcement_learning/rl_env_world.gd"
+}, {
+"base": "Spatial",
 "class": "RLEnvironment",
 "language": "GDScript",
-"path": "res://addons/reinforcement_learning/rl_environment.gd"
+"path": "res://addons/reinforcement_learning/rl_environment/rl_environment.gd"
 } ]
 _global_script_class_icons={
 "Communication": "res://addons/reinforcement_learning/icons/custom_node_icon.png",
 "PhysicsFramesTimer": "res://addons/reinforcement_learning/icons/custom_node_icon.png",
 "RLAgent": "res://addons/reinforcement_learning/icons/agent_node_icon.png",
+"RLEnvWorld": "res://addons/reinforcement_learning/icons/world_node_icon.png",
 "RLEnvironment": "res://addons/reinforcement_learning/icons/env_node_icon.png"
 }
 

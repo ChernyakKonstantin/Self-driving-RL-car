@@ -1,5 +1,5 @@
-extends Node
-class_name Communication, "icons/custom_node_icon.png"
+extends Object
+class_name Communication, "../icons/custom_node_icon.png"
 
 signal got_connection
 signal closed_connection
@@ -13,22 +13,16 @@ enum DataType {
 
 var thread
 
-onready var server = TCP_Server.new()
-onready var connection: StreamPeerTCP
-onready var have_connection: bool = false
-
-func _init():
-	_ready()
+var server = TCP_Server.new()
+var connection: StreamPeerTCP
+var have_connection: bool = false
 
 func _on_start_server(port: int, address: String):
 	# Listen for incoming connections
 	server.listen(port, address)
 	print("Listen on address: ", address, ", port: ", port)
-	
-func _process(delta):
-	_server_pool()
 
-func _server_pool():
+func server_poll():
 	if not have_connection and server.is_connection_available():
 		connection = server.take_connection()
 		var request = _read_request()
