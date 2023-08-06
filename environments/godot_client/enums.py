@@ -10,15 +10,9 @@ class Response(IntEnum):
 
 class Request(IntEnum):
     """Int8."""
-    FRAME = 1
+    CAMERA = 1
     IS_CRASHED = 2
     WHEEL_POSITION = 3
     SPEED = 4
     PARKING_SENSORS = 5
     LIDAR = 6
-
-class DataType(IntEnum):
-    INT32 = 1
-    FLOAT32 = 2
-    JSON = 3
-    NAMED_IMAGE = 4

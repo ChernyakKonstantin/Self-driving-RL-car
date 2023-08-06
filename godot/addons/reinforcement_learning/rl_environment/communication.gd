@@ -4,13 +4,6 @@ class_name Communication, "../icons/custom_node_icon.png"
 signal got_connection
 signal closed_connection
 
-enum DataType {
-	INT32 = 1
-	FLOAT32 = 2
-	JSON = 3
-	NAMED_IMAGE = 4
-}
-
 var thread
 
 var server = TCP_Server.new()
@@ -41,36 +34,23 @@ func _read_request() -> Dictionary:
 	else:
 		return {}
 
-func put_float32(value: float, name: String) -> void:
-	connection.put_string(name)  # Data name
-	connection.put_32(DataType.FLOAT32)  # Data type
-	connection.put_float(value)
-
-func put_int32(value: int, name: String) -> void:
-	connection.put_string(name)  # Data name
-	connection.put_32(DataType.INT32)  # Data type
-	connection.put_32(value)
-
-func put_json(value, name: String) -> void:
+func put_json(value):
 	# value can be Array or Dictionary
 	var value_: PoolByteArray = JSON.print(value).to_utf8() # Encode to bytes
-	connection.put_string(name)  # Data name
-	connection.put_32(DataType.JSON)  # Data type
 	connection.put_32(value_.size())  # Data lenght in bytes
 	connection.put_data(value_)
 
-func put_named_image(value: Dictionary, name: String) -> void:
-	connection.put_string(name)  # Data name
-	connection.put_32(DataType.NAMED_IMAGE)  # Data type
-	connection.put_32(value.size())  # Number of keys
-	for key in value.keys():
-		connection.put_string(key)  # Image name
-		connection.put_32(value[key].size())  # Number of images
-		for image in value[key]:
-			image.convert(Image.FORMAT_RGB8)
-			var image_data = image.get_data()
-			connection.put_32(image_data.size()) # Image length in bytes
-			connection.put_data(image_data)
+#func put_images(value: Dictionary):
+#	connection.put_32(DataType.IMAGES)  # Data type
+#	connection.put_32(value.size())  # Number of keys
+#	for key in value.keys():
+#		connection.put_string(key)  # Image name
+#		connection.put_32(value[key].size())  # Number of images
+#		for image in value[key]:
+#			image.convert(Image.FORMAT_RGB8)
+#			var image_data = image.get_data()
+#			connection.put_32(image_data.size()) # Image length in bytes
+#			connection.put_data(image_data)
 
 func close():
 	have_connection = false

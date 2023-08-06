@@ -5,7 +5,7 @@ export var port: int = 9090
 
 # --------
 enum Request {
-	FRAME = 1,
+	CAMERA = 1,
 	IS_CRASHED = 2,
 	STEERING = 3,
 	SPEED = 4,
@@ -46,22 +46,26 @@ func _after_send_response():
 	agent.data_recorder.clear_storage()
 	
 func _send_response(observation_request: Array):
-	communication.connection.put_32(observation_request.size()) # TODO: fix hardcode
-	if Request.FRAME in observation_request:
-		var frames: Dictionary = agent.get_rgb_camera_data()
-		communication.put_named_image(frames, "cameras")
-	if Request.PARKING_SENSORS in observation_request:
-		var parking_sensors_data: Dictionary = agent.get_parking_sensors_data()
-		communication.put_json(parking_sensors_data, "parking_sensor")
-	if Request.LIDAR in observation_request:
-		var lidar_data: Array = agent.get_lidar_data()
-		communication.put_json(lidar_data, "lidar")
+	var response_json = Dictionary()
+	var binary_data = PoolByteArray()
 	if Request.IS_CRASHED in observation_request:
-		var is_crashed: int = agent.get_is_crashed()
-		communication.put_int32(is_crashed, "is_crashed")
+		response_json["is_crashed"] = agent.get_is_crashed()
 	if Request.STEERING in observation_request:
-		var steering: float = agent.get_steering()
-		communication.put_float32(steering, "steering")
+		response_json["steering"] = agent.get_steering()
 	if Request.SPEED in observation_request:
-		var speed: float = agent.get_speed()
-		communication.put_float32(speed, "speed")
+		response_json["speed"] = agent.get_speed()
+	if Request.PARKING_SENSORS in observation_request:
+		response_json["parking_sensor"] = agent.get_parking_sensors_data()
+	if Request.LIDAR in observation_request:
+		response_json["lidar"] = agent.get_lidar_data()
+	if Request.CAMERA in observation_request:
+		var rgb_camera_data: Dictionary = agent.get_rgb_camera_data()
+		response_json["cameras"] = Array()
+		for key in rgb_camera_data.keys():
+			response_json["cameras"].append(key)
+	communication.put_json(response_json)
+#	communication.put_named_image(frames, "cameras")
+	
+	
+	
+	
