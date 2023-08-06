@@ -62,6 +62,8 @@ func _on_got_connection(request: Dictionary):
 		yield(_step(request[ACTION_KEY]), "completed")
 	elif request.has(CONFIG_KEY):
 		_configure(request[CONFIG_KEY])
+	elif request.has(STATUS_KEY):
+		pass
 	if request.has(OBSERVATION_KEY):
 		_send_response(request[OBSERVATION_KEY])
 		_after_send_response()

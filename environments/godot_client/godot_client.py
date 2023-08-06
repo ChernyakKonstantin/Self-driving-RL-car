@@ -71,13 +71,16 @@ class GodotClient:
                 response = None
         return response
 
-    # # TODO subject of changes
-    # def request_is_ready(self) -> bool:
-    #     """
-    #     Request engine if it is ready to start.
-    #     """
-    #     request = {self.STATUS_KEY: 1}
-    #     return self.request(request)
+    def check_if_server_is_ready(self) -> bool:
+        """
+        Check if server is started.
+        """
+        request = {self.STATUS_KEY: 1}
+        try:
+            self.request(request, response_is_required=False)
+            return True
+        except ConnectionRefusedError:
+            return False
 
     def configure(self, config: Dict[str, Any]) -> bool:
         """
