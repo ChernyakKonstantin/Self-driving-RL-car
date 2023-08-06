@@ -39,8 +39,13 @@ func _server_pool():
 func _read_request() -> Dictionary:
 	var request_package_size = connection.get_available_bytes()
 	var request_data = connection.get_utf8_string(request_package_size)
-	var request = JSON.parse(request_data).result
-	return request
+	if len(request_data) == 0:
+		return {}
+	var request = JSON.parse(request_data)
+	if request.error == OK:
+		return request.result
+	else:
+		return {}
 
 func put_float32(value: float, name: String) -> void:
 	connection.put_string(name)  # Data name
