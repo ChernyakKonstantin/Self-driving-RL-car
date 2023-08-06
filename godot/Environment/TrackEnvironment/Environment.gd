@@ -20,16 +20,15 @@ onready var gui = $GUI
 
 # -------- built-ins --------
 func _ready():
+	print(get_children())
 	server_configuration.connect("start_server", communication, "_on_start_server")
+	# GUI is not pausable
+	gui.set_pause_mode(2)
+	# Agent and World is pausable.
+	world.set_pause_mode(1)
+	agent.set_pause_mode(1)
 	
-	# Environment and server_configuration is not pausable 
-	# while Agent and World is pausable.
-	set_pause_mode(2)
-	for child in get_children():
-		if child.get_name() != "GUI":
-			child.set_pause_mode(1)
-	get_tree().set_pause(true)
-	communication.set_pause_mode(2)
+	
 
 #func _configure(configuration: Dictionary):
 #	if configuration.has("repeat_action"):

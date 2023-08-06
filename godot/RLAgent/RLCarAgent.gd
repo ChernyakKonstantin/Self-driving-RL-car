@@ -1,3 +1,5 @@
+# Make sure agent is called after PhysicsFramesTimer
+
 extends RLAgent
 
 onready var car = $Car

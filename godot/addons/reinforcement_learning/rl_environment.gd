@@ -11,13 +11,16 @@ const OBSERVATION_KEY = "observation"
 onready var repeat_action: int = 4  # TODO: make configurable
 
 # Timer in terms of physics frames.
-onready var physics_frame_counter = PhysicsFramesTimer.new(repeat_action)
+onready var physics_frame_counter = $PhysicsFramesTimer
 
 # Communication server to handle request via TCP protocol.
-onready var communication = Communication.new()
+onready var communication = $Communication
 
 func _ready():
-	add_child(physics_frame_counter)
+	get_tree().set_pause(true)
+	set_pause_mode(2)
+	physics_frame_counter.set_pause_mode(2)
+	communication.set_pause_mode(2)
 	communication.connect("got_connection", self, "_on_got_connection")
 
 # One can extend the method to perform additional logic before or after or override it.

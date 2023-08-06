@@ -14,32 +14,28 @@ enum DataType {
 var thread
 
 onready var server = TCP_Server.new()
-
 onready var connection: StreamPeerTCP
+onready var have_connection: bool = false
 
 func _init():
 	_ready()
-
-# Thread must be disposed (or "joined"), for portability.
-func _exit_tree():
-	thread.wait_to_finish()
 
 func _on_start_server(port: int, address: String):
 	# Listen for incoming connections
 	server.listen(port, address)
 	print("Listen on address: ", address, ", port: ", port)
-	thread = Thread.new()
-	thread.start(self, "_server_pool")
 	
-func _server_pool():
-	while true:
-		if server.is_connection_available():
-			connection = server.take_connection()
-			var request = _read_request()
-			if request != null and not request.empty():
-				emit_signal("got_connection", request)
-				yield(self, "closed_connection")
+func _process(delta):
+	_server_pool()
 
+func _server_pool():
+	if not have_connection and server.is_connection_available():
+		connection = server.take_connection()
+		var request = _read_request()
+		if request != null and not request.empty():
+			have_connection = true
+			emit_signal("got_connection", request)
+		
 func _read_request() -> Dictionary:
 	var request_package_size = connection.get_available_bytes()
 	var request_data = connection.get_utf8_string(request_package_size)
@@ -78,5 +74,6 @@ func put_named_image(value: Dictionary, name: String) -> void:
 			connection.put_data(image_data)
 
 func close():
+	have_connection = false
 	connection.disconnect_from_host()
 	emit_signal("closed_connection")

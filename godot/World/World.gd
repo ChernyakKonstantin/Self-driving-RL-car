@@ -1,3 +1,5 @@
+# Make sure the world _phisics process is called after agent.
+
 extends Spatial
 
 onready var initial_positions: Array = $InitialPositions.get_children()
