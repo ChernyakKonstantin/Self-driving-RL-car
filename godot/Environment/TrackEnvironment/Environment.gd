@@ -11,6 +11,7 @@ enum Request {
 	SPEED = 4,
 	PARKING_SENSORS = 5,
 	LIDAR = 6,
+	GLOBAL_COORDINATES = 7,
 }
 
 onready var agent = $RLCarAgent
@@ -58,6 +59,8 @@ func _send_response(observation_request: Array):
 		response_json["parking_sensor"] = agent.get_parking_sensors_data()
 	if Request.LIDAR in observation_request:
 		response_json["lidar"] = agent.get_lidar_data()
+	if Request.GLOBAL_COORDINATES in observation_request:
+		response_json["global_coordinates"] = agent.get_global_coordinates()
 	if Request.CAMERA in observation_request:
 		var rgb_camera_data: Dictionary = agent.get_rgb_camera_data()
 		response_json["cameras"] = Array()

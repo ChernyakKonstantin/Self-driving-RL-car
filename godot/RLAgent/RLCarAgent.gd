@@ -28,6 +28,18 @@ func get_rgb_camera_data() -> Dictionary:
 func get_parking_sensors_data() -> Dictionary:
 	return data_recorder.parking_sensors_data_storage
 
+func get_global_coordinates() -> Dictionary:
+	var coordinates = Dictionary()
+	coordinates["location"] = Dictionary()
+	coordinates["location"]["x"] = car.get_global_translation().x
+	coordinates["location"]["y"] = car.get_global_translation().y
+	coordinates["location"]["z"] = car.get_global_translation().z
+	coordinates["rotation"] = Dictionary()
+	coordinates["rotation"]["x"] = car.global_rotation().x
+	coordinates["rotation"]["y"] = car.global_rotation().y
+	coordinates["rotation"]["z"] = car.global_rotation().z
+	return coordinates
+
 func step(action: Dictionary) -> void:
 	if action.has("steering_delta"):
 		car.set_steering_delta(action["steering_delta"])
