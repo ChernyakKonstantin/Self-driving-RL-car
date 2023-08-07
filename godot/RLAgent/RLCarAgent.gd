@@ -35,9 +35,9 @@ func get_global_coordinates() -> Dictionary:
 	coordinates["location"]["y"] = car.get_global_translation().y
 	coordinates["location"]["z"] = car.get_global_translation().z
 	coordinates["rotation"] = Dictionary()
-	coordinates["rotation"]["x"] = car.global_rotation().x
-	coordinates["rotation"]["y"] = car.global_rotation().y
-	coordinates["rotation"]["z"] = car.global_rotation().z
+	coordinates["rotation"]["x"] = car.get_global_rotation().x
+	coordinates["rotation"]["y"] = car.get_global_rotation().y
+	coordinates["rotation"]["z"] = car.get_global_rotation().z
 	return coordinates
 
 func step(action: Dictionary) -> void:

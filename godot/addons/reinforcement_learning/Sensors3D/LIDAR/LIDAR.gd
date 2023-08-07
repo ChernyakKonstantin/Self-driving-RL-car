@@ -2,11 +2,13 @@
 #tool
 extends Spatial
 
+# TODO: make lower/upper bound configurable
 export var horizontal_resolution: float = 1 # Degrees
 export var vertical_resolution: float = 1 # Degrees
 export var horizontal_fov: float = 120 # Degrees
 export var vertical_fov: float = 30 # Degrees
 export var ray_max_len: float = 1000 # Meters
+export var return_distances: bool = true
 
 #func _debug_draw_lidar_range():
 #	var visual = ImmediateGeometry.new()
@@ -54,14 +56,23 @@ func _create() -> void:
 			add_child(ray)
 
 func get_data() -> Array:
-	var distances = []
+	var data = []
 	for ray in get_children():
-		var rotation: Vector3 = ray.get_rotation_degrees()
-		var distance: float = ray_max_len
-		if ray.is_colliding():
-			distance = ray.global_translation.distance_to(ray.get_collision_point())
-		distances.append([float(rotation.y), float(rotation.x), float(distance)])
-	return distances
+		if return_distances:
+			var rotation: Vector3 = ray.get_rotation_degrees()
+			var distance: float = ray_max_len
+			if ray.is_colliding():
+				distance = ray.global_translation.distance_to(ray.get_collision_point())
+			data.append([float(rotation.y), float(rotation.x), float(distance)])
+		else:
+			var colision_point_coordinates = Dictionary()
+			if ray.is_colliding():
+				var colision_point: Vector3 = ray.get_collision_point() - ray.global_translation
+				colision_point_coordinates["x"] = colision_point.x
+				colision_point_coordinates["y"] = colision_point.y
+				colision_point_coordinates["z"] = colision_point.z
+			data.append(colision_point_coordinates)
+	return data
 
 func configure(lidar_config: Dictionary):
 	var recreate: bool = false
@@ -79,7 +90,9 @@ func configure(lidar_config: Dictionary):
 		recreate = true
 	if "ray_max_len" in lidar_config.keys():
 		ray_max_len = lidar_config["ray_max_len"]
-	
+	if "return_distances" in lidar_config.keys():
+		return_distances = lidar_config["return_distances"]
+		
 	if recreate:
 		_delete_rays()
 		_create()

@@ -2,7 +2,5 @@
 
 [ext_resource path="res://addons/reinforcement_learning/Sensors3D/LIDAR/LIDAR.gd" type="Script" id=1]
 
-[node name="LIDAR" type="CSGCylinder"]
-radius = 0.05
-height = 0.2
+[node name="LIDAR" type="Spatial"]
 script = ExtResource( 1 )
