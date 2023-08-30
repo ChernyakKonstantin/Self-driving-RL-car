@@ -77,9 +77,9 @@ func get_data(observation_request, storage) -> void:
 			var camera_frames_storage = storage.add_cameras(key)
 			for frame in rgb_camera_data[key]:
 				var frame_storage = camera_frames_storage.add_frame()
-				frame_storage.set_height = frame.get_size().y
-				frame_storage.set_width = frame.get_size().x
-				frame_storage.set_format = "rgb"
+				frame_storage.set_height(int(frame.get_size().y))
+				frame_storage.set_width(int(frame.get_size().x))
+				frame_storage.set_format("rgb")
 				frame_storage.set_data(frame.get_data())
 	if Request.IS_CRASHED in observation_request:
 		storage.set_is_crashed(get_is_crashed())
