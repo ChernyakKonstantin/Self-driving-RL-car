@@ -88,9 +88,14 @@ class GodotClient:
         t2 = time.time()  # TODO: delete
         print("On request json formation: ", t2-t1)  # TODO: delete
         t1 = time.time()  # TODO: delete
-        with socket.create_connection(self.engine_address) as connection:
+        # with socket.create_connection(self.engine_address) as connection:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as connection:
             t2 = time.time()  # TODO: delete
-            print("On socket opening: ", t2-t1)  # TODO: delete
+            print("On socket creating: ", t2-t1)  # TODO: delete
+            t1 = time.time()  # TODO: delete
+            connection.connect(self.engine_address)
+            t2 = time.time()  # TODO: delete
+            print("On socket connection: ", t2-t1)  # TODO: delete
             t1 = time.time()  # TODO: delete
             connection.sendall(request_bytes)
             t2 = time.time()  # TODO: delete
