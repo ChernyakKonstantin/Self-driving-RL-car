@@ -1,5 +1,6 @@
-from environments.godot_client import GodotClient
-from environments.godot_client.enums import Request
+from environments.godot_env_wrapper.godot_client import GodotClient
+from environments.enums import Request
+from training import protobuf_message_module
 from random import choice
 import cv2
 import numpy as np
@@ -29,7 +30,7 @@ config = {
         }
     },
     "environment": {
-        "repeat_action": 8,
+        "repeat_action": 4,
     }
 }
 
@@ -37,17 +38,17 @@ config = {
 
 def naive_steering_control(observation: Dict) -> float:
     steering = observation["steering"]
-    parking_sensor = observation["parking_sensor"]
+    parking_sensor = observation["parking_sensors"]
 
     left = min([
-        parking_sensor["FrontLeft"][-1],
+        parking_sensor["FrontLeft"].distance[-1],
         # parking_sensor["Left"][-1],
         # parking_sensor["RearLeft"][-1],
     ])
     left = left / 2 # Normalize by dividing on maximum possible distance
 
     right = min([
-        parking_sensor["FrontRight"][-1],
+        parking_sensor["FrontRight"].distance[-1],
         # parking_sensor["Right"][-1],
         # parking_sensor["RearRight"][-1],
     ])
@@ -102,7 +103,7 @@ def draw_lidar_as_3d(current_state):
     img = cv2.imdecode(img_arr, 1)
     cv2.imshow("1", img)
 
-client = GodotClient((ADDRESS, PORT), chunk_size=4096)
+client = GodotClient(protobuf_message_module, (ADDRESS, PORT), chunk_size=65536)
 
 while not client.check_if_server_is_ready():
     time.sleep(0.5)
@@ -119,36 +120,43 @@ while True:
         "engine_force_delta": 1, #choice([-1/50, 1/50]),
     }
 
-    requested_observation = [
-        # Request.CAMERA,
-        Request.LIDAR,
-        Request.IS_CRASHED,
-        Request.WHEEL_POSITION,
-        Request.PARKING_SENSORS,
-        Request.SPEED,
-        Request.GLOBAL_COORDINATES,
-    ]
+    requested_observation = {
+        "agent": [
+            # Request.CAMERA,
+            # Request.LIDAR,
+            # Request.IS_CRASHED,
+            # Request.WHEEL_POSITION,
+            # Request.PARKING_SENSORS,
+            # Request.SPEED,
+            # Request.GLOBAL_COORDINATES,
+        ]
+    }
 
-    current_state = client.request_step(action, requested_observation)
-    print(c)
+    import time
+    t1 = time.time()
+    # current_state = client.step(action, requested_observation)
+    client.request({}, response_is_required=False)
+    t2 = time.time()
+    print(c, "\t", t2-t1, "\n")
+#     current_state = current_state["agent"]
 
-    steering_delta  = naive_steering_control(current_state)
+#     steering_delta  = naive_steering_control(current_state)
 
-    if "lidar" in current_state:
-        if config["agent"]["lidar"]["return_distances"]:
-            draw_lidar_as_image(config, current_state)
-        else:
-            draw_lidar_as_3d(current_state)
+#     if len(current_state["lidar"]) > 0:
+#         if config["agent"]["lidar"]["return_distances"]:
+#             draw_lidar_as_image(config, current_state)
+#         else:
+#             draw_lidar_as_3d(current_state)
 
-    if "camera" in current_state:
-        for name in current_state["cameras"].keys():
-            print
-            cv2.imshow(name, cv2.cvtColor(current_state["cameras"][name][0], cv2.COLOR_RGB2BGR))
+#     if len(current_state["cameras"]) > 0:
+#         for name in current_state["cameras"].keys():
+#             print
+#             cv2.imshow(name, cv2.cvtColor(current_state["cameras"][name][0], cv2.COLOR_RGB2BGR))
 
-    if "lidar" in current_state or "cameras" in current_state:
-        if cv2.waitKey(25) & 0xFF == ord('q'):
-            break
+#     if len(current_state["lidar"]) > 0 or len(current_state["cameras"]) > 0:
+#         if cv2.waitKey(25) & 0xFF == ord('q'):
+#             break
 
-cv2.destroyAllWindows()
+# cv2.destroyAllWindows()
 
 

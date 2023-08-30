@@ -1,13 +1,11 @@
 import os
 from functools import partial
-
-import numpy as np
-import torch
+from . import protobuf_message_module
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.env_util import make_vec_env
 
-from environments import GodotClient, TrainToSteerEnv
+from environments import TrainToSteerEnv
 from models.parking_sensor_network import ParkingSensorExtractor, ParkingSensorNetwork
 from policies import CustomActorCriticPolicy
 
@@ -16,7 +14,7 @@ PORT = 9091
 CHUNK_SIZE = 4096
 TERMINATE_ON_CRASH = True
 
-PRETRAINED_ENCODER_WEIGHTS_PATH = "/home/cherniak/Self-driving-RL-car/logs/pretrain_parking_sensor_encoder_with_icm/lightning_logs/version_0/checkpoints/epoch=49-step=3350.ckpt"
+PRETRAINED_ENCODER_WEIGHTS_PATH = None # "/home/cherniak/Self-driving-RL-car/logs/pretrain_parking_sensor_encoder_with_icm/lightning_logs/version_0/checkpoints/epoch=49-step=3350.ckpt"
 FREEZE_ENCODER = True
 
 LOG_DIR = "/home/cherniak/Self-driving-RL-car/logs/train_to_steer_on_parking_sensors/termination_on_collision"
@@ -31,18 +29,20 @@ LR = 1e-3
 def train_to_steer_on_parking_sensors():
     env_fn = partial(
         TrainToSteerEnv,
-        engine_client=GodotClient(engine_address=(ADDRESS, PORT), chunk_size=CHUNK_SIZE),
+        protobuf_message_module,
+        engine_address=(ADDRESS, PORT),
+        engine_chunk_size=CHUNK_SIZE,
         terminate_on_crash=TERMINATE_ON_CRASH,
         wheel_rotation_limit_per_step=(-1 / 15, 1/15),
     )
-    env = make_vec_env(env_fn, n_envs=1)
+    env = make_vec_env(env_fn, n_envs=1, seed=0)
     custom_network_builder = partial(
         ParkingSensorNetwork,
         pretrained_encoder_weights_path=PRETRAINED_ENCODER_WEIGHTS_PATH,
         freeze_encoder=FREEZE_ENCODER,
     )
 
-    # TODO: try masacable ppo and disretized action to enable out-of-box masking
+    # TODO: try maskable ppo and disretized action to enable out-of-box masking
 
     policy_kwargs = {
         "custom_network_builder": custom_network_builder,
@@ -61,7 +61,7 @@ def train_to_steer_on_parking_sensors():
         seed=0,
         tensorboard_log=LOG_DIR,
     )
-    model.set_parameters("/home/cherniak/Self-driving-RL-car/logs/train_to_steer_on_parking_sensors/termination_on_collision/parking_sensors_net_pretrained_with_icm_frozen_encoder_PPO_1/checkpoints/rl_model_26000_steps.zip")
+    # model.set_parameters("/home/cherniak/Self-driving-RL-car/logs/train_to_steer_on_parking_sensors/termination_on_collision/parking_sensors_net_pretrained_with_icm_frozen_encoder_PPO_1/checkpoints/rl_model_26000_steps.zip")
     model.learn(
         callback=CheckpointCallback(
             save_freq = CHECKPOINT_FREQUENCY,

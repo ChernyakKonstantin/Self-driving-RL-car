@@ -2,6 +2,16 @@
 
 extends RLAgent
 
+enum Request {
+	CAMERA = 1,
+	IS_CRASHED = 2,
+	STEERING = 3,
+	SPEED = 4,
+	PARKING_SENSORS = 5,
+	LIDAR = 6,
+	GLOBAL_COORDINATES = 7,
+}
+
 onready var car = $Car
 onready var data_recorder = $DataRecorder
 onready var lidar = $Sensors/LIDAR
@@ -19,7 +29,7 @@ func get_steering() -> float:
 func get_speed() -> float:
 	return car.get_speed()
 	
-func get_lidar_data() -> Dictionary:
+func get_lidar_data() -> Array:
 	return data_recorder.lidar_data_storage
 	
 func get_rgb_camera_data() -> Dictionary:
@@ -30,17 +40,19 @@ func get_parking_sensors_data() -> Dictionary:
 
 func get_global_coordinates() -> Dictionary:
 	var coordinates = Dictionary()
+	var car_global_translation = car.get_global_translation()
 	coordinates["location"] = Dictionary()
-	coordinates["location"]["x"] = car.get_global_translation().x
-	coordinates["location"]["y"] = car.get_global_translation().y
-	coordinates["location"]["z"] = car.get_global_translation().z
+	coordinates["location"]["x"] = car_global_translation.x
+	coordinates["location"]["y"] = car_global_translation.y
+	coordinates["location"]["z"] = car_global_translation.z
+	var car_global_rotation = car.get_global_rotation()
 	coordinates["rotation"] = Dictionary()
-	coordinates["rotation"]["x"] = car.get_global_rotation().x
-	coordinates["rotation"]["y"] = car.get_global_rotation().y
-	coordinates["rotation"]["z"] = car.get_global_rotation().z
+	coordinates["rotation"]["x"] = car_global_rotation.x
+	coordinates["rotation"]["y"] = car_global_rotation.y
+	coordinates["rotation"]["z"] = car_global_rotation.z
 	return coordinates
 
-func step(action: Dictionary) -> void:
+func set_action(action: Dictionary) -> void:
 	if action.has("steering_delta"):
 		car.set_steering_delta(action["steering_delta"])
 	if action.has("engine_force_delta"):
@@ -57,3 +69,46 @@ func configure(agent_config: Dictionary):
 		lidar.configure(agent_config["lidar"])
 	if "car" in agent_config.keys():
 		car.configure(agent_config["car"])
+
+func get_data(observation_request, storage) -> void:
+	if Request.CAMERA in observation_request:
+		var rgb_camera_data = get_rgb_camera_data()
+		for key in rgb_camera_data.keys():
+			var camera_frames_storage = storage.add_cameras(key)
+			for frame in rgb_camera_data[key]:
+				var frame_storage = camera_frames_storage.add_frame()
+				frame_storage.set_height = frame.get_size().y
+				frame_storage.set_width = frame.get_size().x
+				frame_storage.set_format = "rgb"
+				frame_storage.set_data(frame.get_data())
+	if Request.IS_CRASHED in observation_request:
+		storage.set_is_crashed(get_is_crashed())
+	if Request.STEERING in observation_request:
+		storage.set_steering(get_steering())
+	if Request.SPEED in observation_request:
+		storage.set_speed(get_speed())
+	if Request.PARKING_SENSORS in observation_request:
+		var parking_sensors_data = get_parking_sensors_data()
+		for key in parking_sensors_data.keys():
+			var distances_storage = storage.add_parking_sensors(key)
+			for distance in parking_sensors_data[key]:
+				 distances_storage.add_distance(distance)
+	if Request.LIDAR in observation_request:
+		var lidar_data = get_lidar_data()
+		for points in lidar_data:
+			var points_storage = storage.add_lidar()
+			for point in points:
+				var point_storage = points_storage.add_point()
+				point_storage.set_x(point["x"])
+				point_storage.set_y(point["y"])
+				point_storage.set_z(point["z"])	
+	if Request.GLOBAL_COORDINATES in observation_request:
+		var global_coordinates_storage = storage.new_global_coordinates()
+		var global_coordinates = get_global_coordinates()
+		global_coordinates_storage.set_x(global_coordinates["location"]["x"])
+		global_coordinates_storage.set_y(global_coordinates["location"]["y"])
+		global_coordinates_storage.set_z(global_coordinates["location"]["z"])
+		global_coordinates_storage.set_rot_x(global_coordinates["rotation"]["x"])
+		global_coordinates_storage.set_rot_y(global_coordinates["rotation"]["y"])
+		global_coordinates_storage.set_rot_z(global_coordinates["rotation"]["z"])
+

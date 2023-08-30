@@ -8,7 +8,7 @@ export var vertical_resolution: float = 1 # Degrees
 export var horizontal_fov: float = 120 # Degrees
 export var vertical_fov: float = 30 # Degrees
 export var ray_max_len: float = 1000 # Meters
-export var return_distances: bool = true
+export var return_distances: bool = false
 
 #func _debug_draw_lidar_range():
 #	var visual = ImmediateGeometry.new()
@@ -65,13 +65,13 @@ func get_data() -> Array:
 				distance = ray.global_translation.distance_to(ray.get_collision_point())
 			data.append([float(rotation.y), float(rotation.x), float(distance)])
 		else:
-			var colision_point_coordinates = Dictionary()
 			if ray.is_colliding():
+				var colision_point_coordinates = Dictionary()
 				var colision_point: Vector3 = ray.get_collision_point() - ray.global_translation
 				colision_point_coordinates["x"] = colision_point.x
 				colision_point_coordinates["y"] = colision_point.y
 				colision_point_coordinates["z"] = colision_point.z
-			data.append(colision_point_coordinates)
+				data.append(colision_point_coordinates)
 	return data
 
 func configure(lidar_config: Dictionary):
