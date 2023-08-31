@@ -122,25 +122,24 @@ while True:
 
     requested_observation = {
         "agent": [
-            # Request.CAMERA,
+            Request.CAMERA,
             # Request.LIDAR,
-            # Request.IS_CRASHED,
-            # Request.WHEEL_POSITION,
-            # Request.PARKING_SENSORS,
-            # Request.SPEED,
-            # Request.GLOBAL_COORDINATES,
+            Request.IS_CRASHED,
+            Request.WHEEL_POSITION,
+            Request.PARKING_SENSORS,
+            Request.SPEED,
+            Request.GLOBAL_COORDINATES,
         ]
     }
 
     import time
     t1 = time.time()
-    # current_state = client.step(action, requested_observation)
-    client.request({}, response_is_required=False)
+    current_state = client.step(action, requested_observation)
+    current_state = current_state["agent"]
     t2 = time.time()
     print(c, "\t", t2-t1, "\n")
-#     current_state = current_state["agent"]
 
-#     steering_delta  = naive_steering_control(current_state)
+    steering_delta  = naive_steering_control(current_state)
 
 #     if len(current_state["lidar"]) > 0:
 #         if config["agent"]["lidar"]["return_distances"]:
@@ -148,15 +147,17 @@ while True:
 #         else:
 #             draw_lidar_as_3d(current_state)
 
-#     if len(current_state["cameras"]) > 0:
-#         for name in current_state["cameras"].keys():
-#             print
-#             cv2.imshow(name, cv2.cvtColor(current_state["cameras"][name][0], cv2.COLOR_RGB2BGR))
+    if len(current_state["cameras"]) > 0:
+        for name, camera in current_state["cameras"].items():
+            frames = camera.frame
+            frame = frames[0]
+            image = np.frombuffer(frame.data, np.uint8).reshape(frame.height, frame.width, -1)
+            cv2.imshow(name, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
 
-#     if len(current_state["lidar"]) > 0 or len(current_state["cameras"]) > 0:
-#         if cv2.waitKey(25) & 0xFF == ord('q'):
-#             break
+    if len(current_state["lidar"]) > 0 or len(current_state["cameras"]) > 0:
+        if cv2.waitKey(25) & 0xFF == ord('q'):
+            break
 
-# cv2.destroyAllWindows()
+cv2.destroyAllWindows()
 
 
