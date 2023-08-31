@@ -40,7 +40,6 @@ func _ready():
 	communication.connect("got_connection", self, "_on_got_connection")
 
 func _process(delta):
-	print(delta)
 	communication.server_poll()
 
 func _physics_process(delta):
@@ -77,7 +76,6 @@ func _reset():
 
 # Handle incoming connection
 func _on_got_connection(request: Dictionary):
-	var t1 = OS.get_system_time_msecs()  # TODO: delete
 	if request.has(RESET_KEY):
 		_reset()
 	elif request.has(ACTION_KEY):
@@ -89,9 +87,7 @@ func _on_got_connection(request: Dictionary):
 	if request.has(OBSERVATION_KEY):
 		_send_response(request[OBSERVATION_KEY])
 		_after_send_response()
-	communication.close()
-	var t2 = OS.get_system_time_msecs()  # TODO: delete
-	print("Time of processing request (msec): ", t2-t1)  # TODO: delete
+#	communication.close()
 
 func _send_response(observation_request: Dictionary):
 	var message = ProtobufMessage.Message.new()
