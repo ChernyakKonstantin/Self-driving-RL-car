@@ -1,4 +1,4 @@
-from environments.godot_env_wrapper.godot_client import GodotClient
+from godot_gym_api import GodotClient
 from environments.enums import Request
 from training import protobuf_message_module
 from random import choice

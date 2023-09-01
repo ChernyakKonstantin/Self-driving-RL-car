@@ -2,7 +2,7 @@ from typing import Tuple, Dict, List, Any
 
 import numpy as np
 from gymnasium import spaces
-from .godot_env_wrapper import GodotEnvironment
+from godot_gym_api import GodotEnvironment
 from .enums import Request
 
 class TrainToSteerEnv(GodotEnvironment):
