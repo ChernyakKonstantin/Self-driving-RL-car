@@ -17,11 +17,11 @@ PORT = 9090
 config = {
     "agent": {
         "lidar": {
-            "horizontal_resolution": 1,
-            "vertical_resolution": 1,
+            "horizontal_resolution": 6,
+            "vertical_resolution": 6,
             "horizontal_fov": 360,
-            "vertical_fov": 15,
-            "ray_max_len": 1000,
+            "vertical_fov": 36,
+            "ray_max_len": 100,
             "return_distances": False,
         },
         "car": {
@@ -84,11 +84,10 @@ def draw_lidar_as_3d(current_state):
     x = []
     y = []
     z = []
-    for e in current_state["lidar"][-1]:
-        if len(e) > 0:
-            x.append(e["x"])
-            y.append(e["y"])
-            z.append(e["z"])
+    for e in current_state["lidar"][-1].point:
+        x.append(e.x)
+        y.append(e.y)
+        z.append(e.z)
     fig = plt.figure()
     ax = plt.axes(projection='3d')
     ax.scatter3D(x, z, y, s=1)
@@ -105,8 +104,8 @@ def draw_lidar_as_3d(current_state):
 
 client = GodotClient(protobuf_message_module, (ADDRESS, PORT), chunk_size=65536)
 
-while not client.check_if_server_is_ready():
-    time.sleep(0.5)
+# while not client.check_if_server_is_ready():
+#     time.sleep(0.5)
 
 client.configure(config)
 
@@ -123,7 +122,7 @@ while True:
     requested_observation = {
         "agent": [
             Request.CAMERA,
-            # Request.LIDAR,
+            Request.LIDAR,
             Request.IS_CRASHED,
             Request.WHEEL_POSITION,
             Request.PARKING_SENSORS,
@@ -141,11 +140,12 @@ while True:
 
     steering_delta  = naive_steering_control(current_state)
 
-#     if len(current_state["lidar"]) > 0:
-#         if config["agent"]["lidar"]["return_distances"]:
-#             draw_lidar_as_image(config, current_state)
-#         else:
-#             draw_lidar_as_3d(current_state)
+    if len(current_state["lidar"]) > 0:
+        if config["agent"]["lidar"]["return_distances"]:
+            raise ValueError("Depreciated")
+            draw_lidar_as_image(config, current_state)
+        else:
+            draw_lidar_as_3d(current_state)
 
     if len(current_state["cameras"]) > 0:
         for name, camera in current_state["cameras"].items():
