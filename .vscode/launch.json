@@ -16,21 +16,21 @@
             "name": "Launch Main",
             "type": "python",
             "request": "launch",
-            "cwd": "/home/cherniak/Self-driving-RL-car/scripts",
-            "program": "/home/cherniak/Self-driving-RL-car/scripts/main.py",
+            "cwd": "C:\\Users\\chern\\python_projects\\Self-driving-RL-car\\scripts",
+            "program": "C:\\Users\\chern\\python_projects\\Self-driving-RL-car\\scripts\\main.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "args": []
         },
-        {
-            "name": "Aggregate data from steering env",
-            "type": "python",
-            "request": "launch",
-            "cwd": "/home/cherniak/Self-driving-RL-car/scripts",
-            "program": "/home/cherniak/Self-driving-RL-car/scripts/aggregate_data_from_steering_env.py",
-            "console": "integratedTerminal",
-            "justMyCode": false,
-            "args": []
-        }
+        // {
+        //     "name": "Aggregate data from steering env",
+        //     "type": "python",
+        //     "request": "launch",
+        //     "cwd": "/home/cherniak/Self-driving-RL-car/scripts",
+        //     "program": "/home/cherniak/Self-driving-RL-car/scripts/aggregate_data_from_steering_env.py",
+        //     "console": "integratedTerminal",
+        //     "justMyCode": false,
+        //     "args": []
+        // }
     ]
 }

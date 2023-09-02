@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+message WorldData {}
+
+message Point3D {
+	float x = 1;
+	float y = 2;
+	float z = 3;
+	float rot_x = 4;
+	float rot_y = 5;
+	float rot_z = 6;
+}
+
+message CameraFrame {
+	int32 height = 1;
+	int32 width = 2;
+	string format = 3;
+	bytes data = 4;
+}
+
+message CameraFrames {
+	repeated CameraFrame frame = 1;
+}
+
+message ParkingSensorDistances {
+	repeated float distance = 1;
+}
+
+message Points3D {
+	repeated Point3D point = 1;
+}
+
+message AgentData {
+	bool is_crashed = 1;
+	float steering = 2;
+	float speed = 3;
+	repeated Points3D lidar = 4;
+	map<string, CameraFrames> cameras = 5;
+	map<string, ParkingSensorDistances> parking_sensors = 6;
+	Point3D global_coordinates = 7;
+}
+
+message Message {
+	AgentData agent_data = 1;
+	WorldData world_data = 2;
+}
