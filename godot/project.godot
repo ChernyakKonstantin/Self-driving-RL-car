@@ -14,6 +14,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://addons/reinforcement_learning/rl_environment/communication.gd"
 }, {
+"base": "Spatial",
+"class": "GPS",
+"language": "GDScript",
+"path": "res://addons/car_sensors/GPS/GPS.gd"
+}, {
 "base": "Object",
 "class": "PhysicsFramesTimer",
 "language": "GDScript",
@@ -41,6 +46,7 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 "Communication": "res://addons/reinforcement_learning/icons/custom_node_icon.png",
+"GPS": "res://addons/car_sensors/icons/custom_node_icon.png",
 "PhysicsFramesTimer": "res://addons/reinforcement_learning/icons/custom_node_icon.png",
 "RGBCameras": "res://addons/car_sensors/icons/custom_node_icon.png",
 "RLAgent": "res://addons/reinforcement_learning/icons/agent_node_icon.png",

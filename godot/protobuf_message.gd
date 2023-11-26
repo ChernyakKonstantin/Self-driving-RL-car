@@ -1010,6 +1010,89 @@ class Points3D:
 			return PB_ERR.PARSE_INCOMPLETE
 		return result
 	
+class Location:
+	func _init():
+		var service
+		
+		_x = PBField.new("x", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 1, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
+		service = PBServiceField.new()
+		service.field = _x
+		data[_x.tag] = service
+		
+		_y = PBField.new("y", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 2, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
+		service = PBServiceField.new()
+		service.field = _y
+		data[_y.tag] = service
+		
+		_z = PBField.new("z", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 3, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
+		service = PBServiceField.new()
+		service.field = _z
+		data[_z.tag] = service
+		
+		_orientation = PBField.new("orientation", PB_DATA_TYPE.FLOAT, PB_RULE.OPTIONAL, 4, true, DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT])
+		service = PBServiceField.new()
+		service.field = _orientation
+		data[_orientation.tag] = service
+		
+	var data = {}
+	
+	var _x: PBField
+	func get_x() -> float:
+		return _x.value
+	func clear_x() -> void:
+		data[1].state = PB_SERVICE_STATE.UNFILLED
+		_x.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
+	func set_x(value : float) -> void:
+		_x.value = value
+	
+	var _y: PBField
+	func get_y() -> float:
+		return _y.value
+	func clear_y() -> void:
+		data[2].state = PB_SERVICE_STATE.UNFILLED
+		_y.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
+	func set_y(value : float) -> void:
+		_y.value = value
+	
+	var _z: PBField
+	func get_z() -> float:
+		return _z.value
+	func clear_z() -> void:
+		data[3].state = PB_SERVICE_STATE.UNFILLED
+		_z.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
+	func set_z(value : float) -> void:
+		_z.value = value
+	
+	var _orientation: PBField
+	func get_orientation() -> float:
+		return _orientation.value
+	func clear_orientation() -> void:
+		data[4].state = PB_SERVICE_STATE.UNFILLED
+		_orientation.value = DEFAULT_VALUES_3[PB_DATA_TYPE.FLOAT]
+	func set_orientation(value : float) -> void:
+		_orientation.value = value
+	
+	func to_string() -> String:
+		return PBPacker.message_to_string(data)
+		
+	func to_bytes() -> PoolByteArray:
+		return PBPacker.pack_message(data)
+		
+	func from_bytes(bytes : PoolByteArray, offset : int = 0, limit : int = -1) -> int:
+		var cur_limit = bytes.size()
+		if limit != -1:
+			cur_limit = limit
+		var result = PBPacker.unpack_message(data, bytes, offset, cur_limit)
+		if result == cur_limit:
+			if PBPacker.check_required(data):
+				if limit == -1:
+					return PB_ERR.NO_ERRORS
+			else:
+				return PB_ERR.REQUIRED_FIELDS
+		elif limit == -1 && result > 0:
+			return PB_ERR.PARSE_INCOMPLETE
+		return result
+	
 class AgentData:
 	func _init():
 		var service
@@ -1146,13 +1229,13 @@ class AgentData:
 		return element.new_value()
 	
 	var _global_coordinates: PBField
-	func get_global_coordinates() -> Point3D:
+	func get_global_coordinates() -> Location:
 		return _global_coordinates.value
 	func clear_global_coordinates() -> void:
 		data[7].state = PB_SERVICE_STATE.UNFILLED
 		_global_coordinates.value = DEFAULT_VALUES_3[PB_DATA_TYPE.MESSAGE]
-	func new_global_coordinates() -> Point3D:
-		_global_coordinates.value = Point3D.new()
+	func new_global_coordinates() -> Location:
+		_global_coordinates.value = Location.new()
 		return _global_coordinates.value
 	
 	class map_type_cameras:
