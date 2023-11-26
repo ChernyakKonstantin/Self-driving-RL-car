@@ -3,8 +3,6 @@ class_name Communication, "../icons/custom_node_icon.png"
 
 signal got_connection
 
-var thread
-
 var server = TCP_Server.new()
 var connection: StreamPeerTCP = null
 var message_processing: bool = false
@@ -19,7 +17,7 @@ func server_poll():
 		connection = server.take_connection()
 		connection.set_no_delay(true)
 		print("\nConnection is taken.\n")
-		
+
 	if connection != null and not message_processing:
 		if connection.get_status() == StreamPeerTCP.STATUS_CONNECTED:
 			var request = _read_request()
@@ -29,7 +27,7 @@ func server_poll():
 			print("\nConnection is lost!\n")
 			connection.disconnect_from_host()
 			connection = null
-		
+
 func _read_request() -> Dictionary:
 	var request_package_size = connection.get_32()
 	var request_data = connection.get_utf8_string(request_package_size)
@@ -46,4 +44,4 @@ func put_message(message):
 	connection.put_32(message_bytes.size())  # Data lenght in bytes
 	connection.put_data(message_bytes)
 	message_processing = false
-	
+

@@ -21,6 +21,7 @@ var world: RLEnvWorld
 
 # Amount of physics steps to repeat same action.
 onready var repeat_action: int = 4
+onready var  time_speed: float = 1.0
 
 # Timer in terms of physics frames.
 onready var physics_frames_timer = PhysicsFramesTimer.new(repeat_action)
@@ -38,10 +39,10 @@ func _ready():
 	set_pause_mode(Node.PAUSE_MODE_PROCESS)
 	communication.connect("got_connection", self, "_on_got_connection")
 
-func _process(delta):
+func _process(delta_):
 	communication.server_poll()
 
-func _physics_process(delta):
+func _physics_process(delta_):
 	physics_frames_timer.step()
 
 # One can extend the method to perform additional logic before or after or override it.
@@ -113,3 +114,7 @@ func _configure(configuration_request: Dictionary):
 		if "repeat_action" in env_config.keys():
 			repeat_action = env_config["repeat_action"]
 			physics_frames_timer.set_limit(repeat_action)
+		if "time_speed" in env_config.keys():
+			time_speed = env_config["time_speed"]
+			Engine.set_time_scale(time_speed)
+			Engine.set_iterations_per_second(60 * time_speed)
