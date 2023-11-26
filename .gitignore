@@ -6,3 +6,4 @@ godot/.import/
 *.zip
 godot/export_presets.cfg
 logs/
+message_pb2.py  # Compiled messages are not transferable between OS.

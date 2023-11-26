@@ -1,6 +1,6 @@
 from godot_gym_api import GodotClient
 from environments.enums import Request
-from training import protobuf_message_module
+from training import message_pb2 as protobuf_message_module
 from random import choice
 import cv2
 import numpy as np
@@ -37,7 +37,6 @@ config = {
 
 
 def naive_steering_control(observation: Dict) -> float:
-    steering = observation["steering"]
     parking_sensor = observation["parking_sensors"]
 
     left = min([
