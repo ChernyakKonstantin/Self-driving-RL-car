@@ -58,20 +58,14 @@ func _create() -> void:
 func get_data() -> Array:
 	var data = []
 	for ray in get_children():
-		if return_distances:
-			var rotation: Vector3 = ray.get_rotation_degrees()
-			var distance: float = ray_max_len
-			if ray.is_colliding():
-				distance = ray.global_translation.distance_to(ray.get_collision_point())
-			data.append([float(rotation.y), float(rotation.x), float(distance)])
-		else:
-			if ray.is_colliding():
-				var colision_point_coordinates = Dictionary()
-				var colision_point: Vector3 = ray.get_collision_point() - ray.global_translation
-				colision_point_coordinates["x"] = colision_point.x
-				colision_point_coordinates["y"] = colision_point.y
-				colision_point_coordinates["z"] = colision_point.z
-				data.append(colision_point_coordinates)
+		if ray.is_colliding():
+			var colision_point_coordinates = Dictionary()
+			var colision_point: Vector3 = ray.get_collision_point()
+			var normed_collision_point  = colision_point - get_global_translation()
+			colision_point_coordinates["x"] = normed_collision_point.x
+			colision_point_coordinates["y"] = normed_collision_point.y
+			colision_point_coordinates["z"] = normed_collision_point.z
+			data.append(colision_point_coordinates)
 	return data
 
 func configure(lidar_config: Dictionary):
