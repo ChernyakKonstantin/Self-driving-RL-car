@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Environment/TrackEnvironment/Environment.gd" type="Script" id=1]
 [ext_resource path="res://RLAgent/RLCarAgent.tscn" type="PackedScene" id=2]
@@ -6,17 +6,6 @@
 [ext_resource path="res://World/Track.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Environment/TrackEnvironment/GUI.gd" type="Script" id=5]
 [ext_resource path="res://Environment/TrackEnvironment/ServerConfiguration.gd" type="Script" id=6]
-[ext_resource path="res://icon.png" type="Texture" id=7]
-
-[sub_resource type="BoxShape" id=1]
-extents = Vector3( 1000, 1, 1000 )
-
-[sub_resource type="CubeMesh" id=2]
-size = Vector3( 2000, 2, 2000 )
-
-[sub_resource type="SpatialMaterial" id=3]
-albedo_texture = ExtResource( 7 )
-uv1_scale = Vector3( 2000, 2000, 1 )
 
 [node name="Environment" type="Spatial"]
 script = ExtResource( 1 )
@@ -25,15 +14,16 @@ script = ExtResource( 1 )
 transform = Transform( -4.37113e-08, 0, -0.999998, 0, 1, 0, 0.999999, 0, -4.37113e-08, 0.0170623, 0, -0.00871277 )
 
 [node name="RemoteTransform" type="RemoteTransform" parent="RLCarAgent/Car" index="7"]
-transform = Transform( 0.78306, 0.316535, -0.535372, 0.0168817, 0.849666, 0.527052, 0.621719, -0.421751, 0.659995, -2.22582, 2.37431, 3.43925 )
+transform = Transform( -4.37115e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -4.00424, 0.547992, 0.249527 )
 remote_path = NodePath("../../../GUI/ViewportContainer/Viewport/Camera")
 
 [node name="InternalPositionTracker" parent="RLCarAgent/Sensors" index="0"]
 left_steering_wheel_path = NodePath("../../Car/front_left_wheel")
 right_steering_wheel_path = NodePath("../../Car/front_right_wheel")
+left_traction_wheel_path = NodePath("../../Car/back_left_wheel")
+right_traction_wheel_path = NodePath("../../Car/back_right_wheel")
 
 [node name="World" parent="." instance=ExtResource( 4 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -65.0242, 0 )
 
 [node name="GUI" type="Control" parent="."]
 margin_right = 360.0
@@ -53,7 +43,7 @@ handle_input_locally = false
 render_target_update_mode = 3
 
 [node name="Camera" type="Camera" parent="GUI/ViewportContainer/Viewport"]
-transform = Transform( -0.621718, 0.42175, -0.659994, 0.0168817, 0.849666, 0.527052, 0.78306, 0.316535, -0.535371, -3.42218, 2.37431, -2.23453 )
+transform = Transform( -0.999998, 0, 8.74226e-08, 0, 1, 0, -8.74228e-08, 0, -0.999999, -0.232464, 0.547992, -4.01295 )
 fov = 60.0
 
 [node name="ServerConfiguration" type="Control" parent="GUI"]
@@ -99,16 +89,6 @@ text = "Start server"
 position = Vector2( 288, 40 )
 scale = Vector2( 0.089375, 0.089375 )
 texture = ExtResource( 3 )
-
-[node name="StaticBody" type="StaticBody" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0 )
-
-[node name="CollisionShape" type="CollisionShape" parent="StaticBody"]
-shape = SubResource( 1 )
-
-[node name="MeshInstance" type="MeshInstance" parent="StaticBody"]
-mesh = SubResource( 2 )
-material/0 = SubResource( 3 )
 
 [editable path="RLCarAgent"]
 [editable path="RLCarAgent/Car"]
