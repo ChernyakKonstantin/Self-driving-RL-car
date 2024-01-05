@@ -78,7 +78,7 @@ class PursuitEnv(gym.Env):
             reward3 = 0
         # Agent should move forward
         reward4 = 0 if self.car.velocity > 0 else -0.2
-
+        # print(f"dist_rew: {reward1}, rew2: {reward2}, spin_rew: {reward3}, speed_rew: {reward4}")
         reward = reward1 + reward2 + reward3 + reward4
         return reward
 
@@ -92,10 +92,15 @@ class PursuitEnv(gym.Env):
         self.time += self.dt
         self.n_steps += 1
 
-        next_state = self.get_next_state()
-
         target_reached = self.world.is_target_reached(self.car.x, self.car.y)
-        terminated = target_reached or collided
+
+        # Added for v3 tuning (maybe its ok to keep for usual training - need to test the idea.)
+        if target_reached:
+            self.world.reset()
+            
+        next_state = self.get_next_state()
+        # terminated = target_reached or collided
+        terminated = collided
 
         reward = self.reward_function(collided, target_reached)
 
