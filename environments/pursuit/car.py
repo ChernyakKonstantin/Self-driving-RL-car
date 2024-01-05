@@ -6,7 +6,7 @@ import numpy as np
 class Car:
     """Bicycle model of four-wheeled car with front wheel for steering."""
     def __init__(
-            self, 
+            self,
             wheel_base: float = 2.4,  # m
             max_steering: float = np.pi/3,  # radians/s
             max_steering_speed: float = np.pi/3,  # radians/s
@@ -22,7 +22,7 @@ class Car:
         self.max_speed_rear = max_speed_rear
         self.max_acceleration = max_acceleration
         self.max_deceleration = max_deceleration
-
+        self.orientation_range = (-2*math.pi, 2*math.pi)
         self.x: float  # m
         self.y: float  # m
         self.velocity: float  # m/s
@@ -32,9 +32,9 @@ class Car:
         self.reset()
 
     def reset(
-            self, 
-            initial_x: float = 0., 
-            initial_y: float = 0, 
+            self,
+            initial_x: float = 0.,
+            initial_y: float = 0,
             initial_velocity: float = 0.,
             initial_steering: float = 0.,
             initial_orientation: float = 0.,
@@ -58,6 +58,13 @@ class Car:
         return state
 
     def step(self, dt: float, acceleration: float, steering_speed: float):
+
+        if acceleration < 0:
+            acceleration = abs(acceleration) * self.max_deceleration
+        else:
+            acceleration *= self.max_acceleration
+        steering_speed *= self.max_steering_speed
+
         self.acceleration = acceleration
         d_steering = steering_speed * dt
         self.steering = np.clip(self.steering + d_steering, -self.max_steering, self.max_steering)
@@ -66,7 +73,7 @@ class Car:
         d_orientation = self.velocity * np.tan(self.steering) / self.wheel_base
         d_x = self.velocity * np.cos(self.orientation)
         d_y = self.velocity * np.sin(self.orientation)
-        
+
         self.velocity = np.clip(self.velocity + d_velocity, self.max_speed_rear, self.max_speed_forward)
         self.orientation += d_orientation
         self.orientation = np.sign(self.orientation) * (abs(self.orientation) % (2 * math.pi))
