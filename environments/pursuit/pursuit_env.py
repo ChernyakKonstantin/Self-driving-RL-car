@@ -12,8 +12,8 @@ class PursuitEnv(gym.Env):
     SEED = 0
 
     def __init__(
-            self, 
-            car_config: Dict[str, float] = {}, 
+            self,
+            car_config: Dict[str, float] = {},
             world_config: Dict[str, float] = {},
             dt: float = 1/30,  # s
             timeout: float = 60, # s
@@ -28,31 +28,31 @@ class PursuitEnv(gym.Env):
             "tgt_x": gym.spaces.Box(
                0,
                 self.world.width,
-                [1,], 
+                [1,],
                 np.float32,
             ),
             "tgt_y": gym.spaces.Box(
                 0,
                 self.world.width,
-                [1,], 
+                [1,],
                 np.float32,
             ),
             "x": gym.spaces.Box(
                 0,
                 self.world.width,
-                [1,], 
+                [1,],
                 np.float32,
             ),
             "y": gym.spaces.Box(
                 0,
                 self.world.height,
-                [1,], 
+                [1,],
                 np.float32,
             ),
             "orientation": gym.spaces.Box(
-                -self.PIx2, 
-                self.PIx2, 
-                [1,], 
+                -self.PIx2,
+                self.PIx2,
+                [1,],
                 np.float32,
             ),
             "velocity": gym.spaces.Box(
@@ -76,7 +76,7 @@ class PursuitEnv(gym.Env):
         })
 
         self.action_space = gym.spaces.Box(-1, 1, [2,], dtype=np.float32)
-          
+
         self.time: float
         self.n_steps: int
 
@@ -87,7 +87,7 @@ class PursuitEnv(gym.Env):
         next_state.update(car_state)
         next_state.update(tgt_state)
         return next_state
-    
+
     def step(self, action):
         acceleration = action[0]
         if acceleration < 0:
@@ -102,11 +102,11 @@ class PursuitEnv(gym.Env):
         self.time += self.dt
         self.n_steps += 1
         self.car.step(self.dt, acceleration, steering_speed)
-        
+
         next_state = self.get_next_state()
 
         out_of_bounds = not (0 <= self.car.x <= self.world.width and 0 <= self.car.y <= self.world.height)
-        position_matched = self.world.position_is_matched(self.car.x, self.car.y)    
+        position_matched = self.world.position_is_matched(self.car.x, self.car.y)
         terminated = position_matched or out_of_bounds
         reward = -np.sqrt(np.square(np.array([self.car.x, self.car.y]) - np.array([self.world.tgt_x, self.world.tgt_y])).sum()).item()
         if out_of_bounds:
@@ -117,8 +117,8 @@ class PursuitEnv(gym.Env):
         }
         self.render()
         return next_state, reward, terminated, truncated, info
-        
-    
+
+
     def reset(self, options=None, seed=SEED):
         self.time = 0.0
         self.n_steps = 0
@@ -143,12 +143,12 @@ class PursuitEnv(gym.Env):
         cv2.line(image, top_right, bottom_right, color=(0, 0, 0), thickness=2)
         cv2.line(image, bottom_right, bottom_left, color=(0, 0, 0), thickness=2)
         cv2.line(image, bottom_left, top_left, color=(0, 0, 0), thickness=2)
-        
+
         cv2.circle(image, (int(round(self.world.tgt_x)), int(round(self.world.tgt_y))), TARGET_SIZE + self.world.catch_radius, (0, 255, 0, 20), -1)
         cv2.circle(image, (int(round(self.world.tgt_x)), int(round(self.world.tgt_y))), TARGET_SIZE, (0, 0, 255), -1)
-        
+
         cv2.circle(image, (int(round(self.car.x)), int(round(self.car.y))), CAR_SIZE, (255, 0, 0), -1)
-        
+
         frame_shape = (self.world.height + MARGIN * 2, self.world.width + MARGIN * 2, 3)
         frame = np.full(frame_shape, 255, dtype=np.uint8)
         frame[MARGIN:-MARGIN, MARGIN:-MARGIN, :] = image
@@ -157,6 +157,6 @@ class PursuitEnv(gym.Env):
         if cv2.waitKey(25) & 0xFF == ord('q'):
             self.close()
 
-    
+
     def close(self):
         cv2.destroyAllWindows()
