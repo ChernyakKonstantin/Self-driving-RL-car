@@ -65,9 +65,20 @@ class PursuitEnv(gym.Env):
                 reward2 = -self.car.velocity / self.car.max_speed_forward
             else:
                 reward2 = -self.car.velocity / self.car.max_speed_rear
+            reward2 += 10
         else:
             reward2 = 0
-        reward = reward1 + reward2
+        # Agent should not spin
+        if self.car.velocity > 0:
+            reward3 = -self.car.centrifugal_force_amplitude() / self.car.max_centrifugal_force_amplitude_forward
+        elif self.car.velocity < 0:
+            reward3 = -self.car.centrifugal_force_amplitude() / self.car.max_centrifugal_force_amplitude_rear
+        else:
+            reward3 = 0
+        # Agent should move forward
+        reward4 = 0 if self.car.velocity > 0 else -0.2
+
+        reward = reward1 + reward2 + reward3 + reward4
         return reward
 
     def step(self, action):

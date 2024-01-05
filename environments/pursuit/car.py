@@ -22,7 +22,15 @@ class Car:
         self.max_speed_rear = max_speed_rear
         self.max_acceleration = max_acceleration
         self.max_deceleration = max_deceleration
-        self.orientation_range = (-2*math.pi, 2*math.pi)
+        self.orientation_range = (-math.pi, math.pi)
+        self.max_centrifugal_force_amplitude_forward = self.centrifugal_force_amplitude(
+            self.max_speed_forward,
+            self.max_steering,
+        )
+        self.max_centrifugal_force_amplitude_rear = self.centrifugal_force_amplitude(
+            self.max_speed_rear,
+            self.max_steering,
+        )
         self.x: float  # m
         self.y: float  # m
         self.velocity: float  # m/s
@@ -76,7 +84,20 @@ class Car:
 
         self.velocity = np.clip(self.velocity + d_velocity, self.max_speed_rear, self.max_speed_forward)
         self.orientation += d_orientation
-        self.orientation = np.sign(self.orientation) * (abs(self.orientation) % (2 * math.pi))
+
+        # Change from commented below
+        if self.orientation > math.pi:
+            self.orientation -= 2 * math.pi
+        elif self.orientation < -math.pi:
+            self.orientation += 2 * math.pi
+        # self.orientation = np.sign(self.orientation) * (abs(self.orientation) % (2 * math.pi))
 
         self.x += d_x
         self.y += d_y
+
+    def centrifugal_force_amplitude(self, velocity: float = None, steering: float = None) -> float:
+        if velocity is None:
+            velocity = self.velocity
+        if steering is None:
+            steering = self.steering
+        return abs(velocity ** 2 * math.tan(steering) / self.wheel_base)
