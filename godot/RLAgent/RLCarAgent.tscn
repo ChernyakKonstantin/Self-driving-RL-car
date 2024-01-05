@@ -20,9 +20,9 @@ transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0
 
 [node name="InternalPositionTracker" type="Spatial" parent="Sensors"]
 script = ExtResource( 9 )
-wheel_path = NodePath("../../Car/front_left_wheel")
 
 [node name="GPS" type="Spatial" parent="Sensors"]
+transform = Transform( -1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 0, -1.45 )
 script = ExtResource( 8 )
 
 [node name="LIDAR" parent="Sensors" instance=ExtResource( 2 )]
