@@ -3,36 +3,35 @@ class_name InternalPositionTracker, "../icons/custom_node_icon.png"
 
 # Steering wheel is expected here.
 export (NodePath) var wheel_path
+export (float) var max_rpm = 1000.0
 
 var wheel: VehicleWheel
 
-onready var position = Vector2(0, 0)
-onready var orientation = deg2rad(0.0)
+onready var position: Vector2
+onready var orientation: float
 
 func _ready():
 	wheel = get_node(wheel_path)
+	reset()
 	
 func reset():
-	position = Vector2(0, 0)
-	orientation = deg2rad(0.0)
+	position = Vector2(0.0, 0.0)
+	orientation = 0.0
 	
 func _physics_process(delta):
-	var N_wh_rev = wheel.get_rpm() / 60 * delta
+	var rpm = abs(wheel.get_rpm())
+	if rpm > max_rpm:
+		rpm = 0
+	var N_wh_rev = rpm / 60 * delta # Why I have negative RPM here?
+	print(wheel.get_rpm())
 	var delta_l = N_wh_rev * 2 * PI * wheel.get_radius()
 	var steering_angle = wheel.get_steering()
-	var delta_x
-	var delta_y
-	if steering_angle != 0:
-		steering_angle = deg2rad(steering_angle)
-		var turning_arc_radius = delta_l / steering_angle
-		var turning_arch_chord = 2 * sin(steering_angle / 2) * turning_arc_radius
-		delta_x = cos(steering_angle) * turning_arch_chord
-		delta_y = sin(steering_angle) * turning_arch_chord
-		orientation += steering_angle
-	else:
-		delta_x = cos(orientation) * delta_l
-		delta_y = sin(orientation) * delta_l
+	orientation += steering_angle
+	var delta_x = cos(orientation) * delta_l
+	var delta_y = sin(orientation) * delta_l
 	var delta_position = Vector2(delta_x, delta_y)
+	print(position, " / ", delta_position, " / ", steering_angle, " / ", delta_l)
+	print()
 	position += delta_position
 	
 func get_data() -> Dictionary:
