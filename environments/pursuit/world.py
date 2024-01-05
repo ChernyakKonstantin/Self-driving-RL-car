@@ -3,7 +3,7 @@ from typing import Dict
 from scipy import spatial
 
 class World:
-    def __init__(self, width=100, height=100, tgt_spawn_zone_ratio: float=0.8, catch_radius=1, seed=0):
+    def __init__(self, width=100, height=100, tgt_spawn_zone_ratio: float=0.8, catch_radius=5, seed=0):  # Separate commit after reward change
         np.random.seed(seed)
 
         self.width = width
@@ -28,8 +28,8 @@ class World:
         return get_distance_to_target <= self.catch_radius
 
     def sample_tgt_position(self):
-        self.tgt_x = np.random.rand() * np.random.choice([self.left_spawn_limit, self.right_spawn_limit])
-        self.tgt_y = np.random.rand() * np.random.choice([self.top_spawn_limit, self.bottom_spawn_limit])
+        self.tgt_x = np.random.uniform(self.left_spawn_limit, self.right_spawn_limit)
+        self.tgt_y = np.random.uniform(self.top_spawn_limit, self.bottom_spawn_limit)
 
     def reset(self):
         self.sample_tgt_position()
