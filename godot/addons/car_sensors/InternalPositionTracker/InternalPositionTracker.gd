@@ -34,7 +34,6 @@ func _physics_process(delta):
 		delta_y = sin(orientation) * delta_l
 	var delta_position = Vector2(delta_x, delta_y)
 	position += delta_position
-	print("Position: ", position)
 	
 func get_data() -> Dictionary:
 	var data = Dictionary()
