@@ -38,6 +38,7 @@ class PursuitEnv(gym.Env):
                 "steering": gym.spaces.Box(-self.car.max_steering, self.car.max_steering, [1], np.float32),
                 "steering_speed": gym.spaces.Box(-self.car.max_steering_speed, self.car.max_steering_speed, [1], np.float32),
                 "acceleration": gym.spaces.Box(self.car.max_deceleration, self.car.max_acceleration, [1], np.float32),
+                # "distance_to_obstacle": gym.spaces.Box(0, max(self.world.width, self.world.height), [4], np.float32),  # Not used yet
             }
         )
         # Deceleration / Acceleration and Steering velocity. Both are relative.
@@ -66,18 +67,20 @@ class PursuitEnv(gym.Env):
                 reward2 = -self.car.velocity / self.car.max_speed_forward
             else:
                 reward2 = -self.car.velocity / self.car.max_speed_rear
-            reward2 += 10
+            reward2 += 30
         else:
             reward2 = 0
-        # Agent should not spin
-        if self.car.velocity > 0:
-            reward3 = -self.car.centrifugal_force_amplitude() / self.car.max_centrifugal_force_amplitude_forward
-        elif self.car.velocity < 0:
-            reward3 = -self.car.centrifugal_force_amplitude() / self.car.max_centrifugal_force_amplitude_rear
-        else:
-            reward3 = 0
+        # Agent should faster reach target
+        reward3 = -1
+        # # Agent should not spin
+        # if self.car.velocity > 0:
+        #     reward3 = -self.car.centrifugal_force_amplitude() / self.car.max_centrifugal_force_amplitude_forward
+        # elif self.car.velocity < 0:
+        #     reward3 = -self.car.centrifugal_force_amplitude() / self.car.max_centrifugal_force_amplitude_rear
+        # else:
+        #     reward3 = 0
         # Agent should move forward
-        reward4 = 0 if self.car.velocity > 0 else -0.2
+        reward4 = 0 if self.car.velocity > 0 else -0.1
         # print(f"dist_rew: {reward1}, rew2: {reward2}, spin_rew: {reward3}, speed_rew: {reward4}")
         reward = reward1 + reward2 + reward3 + reward4
         return reward
@@ -87,6 +90,8 @@ class PursuitEnv(gym.Env):
         steering_speed = action[1]
         self.car.step(self.dt, acceleration, steering_speed)
         collided = self.world.maybe_handle_collison(self.car)
+        if collided:
+            self.car.velocity = 0.0
 
         truncated = self.time >= self.timeout
         self.time += self.dt
@@ -100,7 +105,7 @@ class PursuitEnv(gym.Env):
 
         next_state = self.get_next_state()
         # terminated = target_reached or collided
-        terminated = collided
+        terminated = False # collided
 
         reward = self.reward_function(collided, target_reached)
 
