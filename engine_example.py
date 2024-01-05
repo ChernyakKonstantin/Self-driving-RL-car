@@ -22,7 +22,6 @@ config = {
             "horizontal_fov": 360,
             "vertical_fov": 36,
             "ray_max_len": 100,
-            "return_distances": False,
         },
         "car": {
             "max_steering_angle": 0.2,
