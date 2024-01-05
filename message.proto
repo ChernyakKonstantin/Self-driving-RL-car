@@ -30,6 +30,13 @@ message Points3D {
 	repeated Point3D point = 1;
 }
 
+message Location {
+	float x = 1;
+	float y = 2;
+	float z = 3;
+	float orientation = 4;
+}
+
 message AgentData {
 	bool is_crashed = 1;
 	float steering = 2;
@@ -37,7 +44,8 @@ message AgentData {
 	repeated Points3D lidar = 4;
 	map<string, CameraFrames> cameras = 5;
 	map<string, ParkingSensorDistances> parking_sensors = 6;
-	Point3D global_coordinates = 7;
+	Location global_coordinates = 7;
+	Location internal_coordinates = 8;
 }
 
 message Message {

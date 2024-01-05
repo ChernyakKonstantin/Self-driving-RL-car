@@ -10,12 +10,14 @@ enum Request {
 	PARKING_SENSORS = 5,
 	LIDAR = 6,
 	GLOBAL_COORDINATES = 7,
+	INTERNAL_COORDINATES = 8,
 }
 
 onready var car = $Car
 onready var data_recorder = $DataRecorder
 onready var lidar = $Sensors/LIDAR
 onready var gps = $Sensors/GPS
+onready var internal_position_tracker = $Sensors/InternalPositionTracker
 
 # -------- built-ins --------
 func _ready():
@@ -41,6 +43,9 @@ func get_parking_sensors_data() -> Dictionary:
 
 func get_gps_data() -> Dictionary:
 	return gps.get_data()
+	
+func get_internal_position_tracker_data() -> Dictionary:
+	return internal_position_tracker.get_data()
 
 func set_action(action: Dictionary) -> void:
 	if action.has("steering_delta"):
@@ -96,10 +101,13 @@ func get_data(observation_request, storage) -> void:
 	if Request.GLOBAL_COORDINATES in observation_request:
 		var global_coordinates_storage = storage.new_global_coordinates()
 		var global_coordinates = get_gps_data()
-		global_coordinates_storage.set_x(global_coordinates["location"]["x"])
-		global_coordinates_storage.set_y(global_coordinates["location"]["y"])
-		global_coordinates_storage.set_z(global_coordinates["location"]["z"])
-		global_coordinates_storage.set_rot_x(global_coordinates["rotation"]["x"])
-		global_coordinates_storage.set_rot_y(global_coordinates["rotation"]["y"])
-		global_coordinates_storage.set_rot_z(global_coordinates["rotation"]["z"])
-
+		global_coordinates_storage.set_x(global_coordinates["x"])
+		global_coordinates_storage.set_y(global_coordinates["y"])
+		global_coordinates_storage.set_z(global_coordinates["z"])
+		global_coordinates_storage.set_orientation(global_coordinates["orientation"])
+	if Request.INTERNAL_COORDINATES in observation_request:
+		var internal_coordinates_storage = storage.new_internal_coordinates()
+		var internal_coordinates = get_internal_position_tracker_data()
+		internal_coordinates_storage.set_x(internal_coordinates["x"])
+		internal_coordinates_storage.set_y(internal_coordinates["y"])
+		internal_coordinates_storage.set_orientation(internal_coordinates["orientation"])

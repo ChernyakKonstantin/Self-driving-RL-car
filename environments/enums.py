@@ -17,3 +17,4 @@ class Request(IntEnum):
     PARKING_SENSORS = 5
     LIDAR = 6
     GLOBAL_COORDINATES = 7
+    INTERNAL_COORDINATES = 8
