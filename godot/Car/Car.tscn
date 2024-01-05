@@ -5,7 +5,7 @@
 [ext_resource path="res://Car/assets/car.glb" type="PackedScene" id=3]
 
 [sub_resource type="BoxShape" id=1]
-extents = Vector3( 0.825, 0.59, 2.04 )
+extents = Vector3( 1, 0.59642, 2.04994 )
 
 [node name="Car" type="VehicleBody"]
 contact_monitor = true
@@ -14,7 +14,7 @@ script = ExtResource( 1 )
 [node name="SensorPlaceholder" type="RemoteTransform" parent="."]
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000451942, 0.842136, 0.44536 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.842, 0.445 )
 shape = SubResource( 1 )
 
 [node name="car" parent="." instance=ExtResource( 3 )]
