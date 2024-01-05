@@ -15,6 +15,7 @@ enum Request {
 onready var car = $Car
 onready var data_recorder = $DataRecorder
 onready var lidar = $Sensors/LIDAR
+onready var gps = $Sensors/GPS
 
 # -------- built-ins --------
 func _ready():
@@ -38,19 +39,8 @@ func get_rgb_camera_data() -> Dictionary:
 func get_parking_sensors_data() -> Dictionary:
 	return data_recorder.parking_sensors_data_storage
 
-func get_global_coordinates() -> Dictionary:
-	var coordinates = Dictionary()
-	var car_global_translation = car.get_global_translation()
-	coordinates["location"] = Dictionary()
-	coordinates["location"]["x"] = car_global_translation.x
-	coordinates["location"]["y"] = car_global_translation.y
-	coordinates["location"]["z"] = car_global_translation.z
-	var car_global_rotation = car.get_global_rotation()
-	coordinates["rotation"] = Dictionary()
-	coordinates["rotation"]["x"] = car_global_rotation.x
-	coordinates["rotation"]["y"] = car_global_rotation.y
-	coordinates["rotation"]["z"] = car_global_rotation.z
-	return coordinates
+func get_gps_data() -> Dictionary:
+	return gps.get_data()
 
 func set_action(action: Dictionary) -> void:
 	if action.has("steering_delta"):
@@ -105,7 +95,7 @@ func get_data(observation_request, storage) -> void:
 				point_storage.set_z(point["z"])
 	if Request.GLOBAL_COORDINATES in observation_request:
 		var global_coordinates_storage = storage.new_global_coordinates()
-		var global_coordinates = get_global_coordinates()
+		var global_coordinates = get_gps_data()
 		global_coordinates_storage.set_x(global_coordinates["location"]["x"])
 		global_coordinates_storage.set_y(global_coordinates["location"]["y"])
 		global_coordinates_storage.set_z(global_coordinates["location"]["z"])
