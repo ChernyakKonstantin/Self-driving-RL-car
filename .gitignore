@@ -7,3 +7,4 @@ godot/.import/
 godot/export_presets.cfg
 logs/
 training/message_pb2.py  # Compiled messages are not transferable between OSes.
+message_pb2.py
