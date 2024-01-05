@@ -6,7 +6,7 @@ import os
 
 LOG_DIR = "/Users/cherniak/pet_projects/Self-driving-RL-car/logs/train_to_reach target"
 LOG_NAME = "default_SB"
-SUFFIX = "_4_(with_SDE)"
+SUFFIX = "_5"
 
 DEVICE = "cuda:0"
 
@@ -17,7 +17,7 @@ CHECKPOINT_FREQUENCY = int(1.8 * 1e4)
 
 if __name__ == "__main__":
     env = make_vec_env(lambda: PursuitEnv(), n_envs=N_ENVS, seed=0)
-    model = PPO("MultiInputPolicy", env=env, n_steps=N_STEPS, tensorboard_log=LOG_DIR, device=DEVICE, verbose=1, batch_size=129072, use_sde=True)
+    model = PPO("MultiInputPolicy", env=env, n_steps=N_STEPS, tensorboard_log=LOG_DIR, device=DEVICE, verbose=1, batch_size=129072)
     model.learn(
         callback=CheckpointCallback(
             save_freq = CHECKPOINT_FREQUENCY,

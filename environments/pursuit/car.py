@@ -35,6 +35,7 @@ class Car:
         self.y: float  # m
         self.velocity: float  # m/s
         self.steering: float  # rad
+        self.steering_speed: float  # rad
         self.orientation: float  # rad
         self.acceleration: float  # m/s^2
         self.reset()
@@ -45,12 +46,14 @@ class Car:
             initial_y: float = 0,
             initial_velocity: float = 0.,
             initial_steering: float = 0.,
+            initial_steering_speed: float =0.,
             initial_orientation: float = 0.,
         ):
         self.x = initial_x
         self.y = initial_y
         self.velocity = initial_velocity
         self.steering = initial_steering
+        self.steering_speed = initial_steering_speed
         self.orientation = initial_orientation
         self.acceleration = 0.
 
@@ -61,6 +64,7 @@ class Car:
             "orientation": [self.orientation,],
             "velocity": [self.velocity,],
             "steering": [self.steering,],
+            "steering_speed": [self.steering_speed,],
             "acceleration" : [self.acceleration,]
         }
         return state
@@ -74,6 +78,8 @@ class Car:
         steering_speed *= self.max_steering_speed
 
         self.acceleration = acceleration
+        self.steering_speed = steering_speed
+
         d_steering = steering_speed * dt
         self.steering = np.clip(self.steering + d_steering, -self.max_steering, self.max_steering)
 
