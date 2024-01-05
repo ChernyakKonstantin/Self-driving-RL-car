@@ -59,7 +59,7 @@ class PursuitEnv(gym.Env):
         reward1 = -self.world.get_distance_to_target(self.car.x, self.car.y) / self.world.max_distance_to_target
         if collided:
             # Agent should avoid collisions.
-            reward2 = -100
+            reward2 = -10
         elif target_reached:
             # Agent should stop at the target
             if self.car.velocity > 0:
