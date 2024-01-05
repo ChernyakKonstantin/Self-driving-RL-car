@@ -48,6 +48,7 @@ class Car:
             initial_steering: float = 0.,
             initial_steering_speed: float =0.,
             initial_orientation: float = 0.,
+            initial_acceleration: float = 0.0,
         ):
         self.x = initial_x
         self.y = initial_y
@@ -55,7 +56,7 @@ class Car:
         self.steering = initial_steering
         self.steering_speed = initial_steering_speed
         self.orientation = initial_orientation
-        self.acceleration = 0.
+        self.acceleration = initial_acceleration
 
     def get_state(self) -> Dict[str, float]:
         state = {

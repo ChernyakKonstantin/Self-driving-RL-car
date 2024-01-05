@@ -97,7 +97,7 @@ class PursuitEnv(gym.Env):
         # Added for v3 tuning (maybe its ok to keep for usual training - need to test the idea.)
         if target_reached:
             self.world.reset()
-            
+
         next_state = self.get_next_state()
         # terminated = target_reached or collided
         terminated = collided
@@ -117,7 +117,15 @@ class PursuitEnv(gym.Env):
         self.time = 0.0
         self.n_steps = 0
         self.world.reset()
-        self.car.reset(initial_x=self.world.width / 2, initial_y=self.world.height / 2)
+        self.car.reset(
+            initial_x=np.random.uniform(10, self.world.width - 10),
+            initial_y=np.random.uniform(10, self.world.width - 10),
+            initial_orientation=np.random.uniform(-np.pi, np.pi),
+            initial_velocity=np.random.uniform(0, self.car.max_speed_forward * 0.5),
+            initial_steering=np.random.uniform(-self.car.max_steering, self.car.max_steering),
+            initial_steering_speed=np.random.uniform(-self.car.max_steering_speed, self.car.max_steering_speed),
+            initial_acceleration=np.random.uniform(self.car.max_deceleration, self.car.max_acceleration),
+        )
         next_state = self.get_next_state()
         return next_state, {}
 
