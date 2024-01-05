@@ -1,6 +1,6 @@
 import os
 from functools import partial
-from . import protobuf_message_module
+from . import message_pb2 as protobuf_message_module
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.env_util import make_vec_env
