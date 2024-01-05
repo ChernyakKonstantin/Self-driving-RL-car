@@ -9,5 +9,3 @@ func get_data():
 	for camera in get_children():
 		result[camera.get_name()] = camera.get_data() 
 	return result
-
-extends Object
