@@ -23,6 +23,10 @@ class Car:
         self.max_acceleration = max_acceleration
         self.max_deceleration = max_deceleration
         self.orientation_range = (-math.pi, math.pi)
+        self.angular_speed_range = (
+            self.max_speed_rear * np.tan(self.max_steering) / self.wheel_base / (1/30), # TODO: Hardcoded delta_t
+            self.max_speed_forward * np.tan(self.max_steering) / self.wheel_base / (1/30), # TODO: Hardcoded delta_t
+        )
         self.max_centrifugal_force_amplitude_forward = self.centrifugal_force_amplitude(
             self.max_speed_forward,
             self.max_steering,
@@ -38,6 +42,7 @@ class Car:
         self.steering_speed: float  # rad
         self.orientation: float  # rad
         self.acceleration: float  # m/s^2
+        self.angular_speed: float  # rad/s
         self.reset()
 
     def reset(
@@ -57,6 +62,7 @@ class Car:
         self.steering_speed = initial_steering_speed
         self.orientation = initial_orientation
         self.acceleration = initial_acceleration
+        self.angular_speed = self.velocity * np.tan(self.steering) / self.wheel_base / (1/30)  # TODO: Hardcoded delta_t
 
     def get_state(self) -> Dict[str, float]:
         state = {
@@ -65,8 +71,9 @@ class Car:
             "orientation": [self.orientation,],
             "velocity": [self.velocity,],
             "steering": [self.steering,],
-            "steering_speed": [self.steering_speed,],
-            "acceleration" : [self.acceleration,]
+            "angular_speed": [self.angular_speed,],
+            # "steering_speed": [self.steering_speed,],
+            # "acceleration" : [self.acceleration,]
         }
         return state
 
@@ -86,6 +93,8 @@ class Car:
 
         d_velocity = acceleration * dt
         d_orientation = self.velocity * np.tan(self.steering) / self.wheel_base
+        self.angular_speed = d_orientation / (1/30) # TODO: Hardcoded delta_t
+
         d_x = self.velocity * np.cos(self.orientation)
         d_y = self.velocity * np.sin(self.orientation)
 

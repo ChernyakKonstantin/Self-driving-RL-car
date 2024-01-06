@@ -36,8 +36,9 @@ class PursuitEnv(gym.Env):
                 "orientation": gym.spaces.Box(*self.car.orientation_range, [1], np.float32),
                 "velocity": gym.spaces.Box(self.car.max_speed_rear, self.car.max_speed_forward, [1], np.float32),
                 "steering": gym.spaces.Box(-self.car.max_steering, self.car.max_steering, [1], np.float32),
-                "steering_speed": gym.spaces.Box(-self.car.max_steering_speed, self.car.max_steering_speed, [1], np.float32),
-                "acceleration": gym.spaces.Box(self.car.max_deceleration, self.car.max_acceleration, [1], np.float32),
+                "angular_speed": gym.spaces.Box(*self.car.angular_speed_range, [1], np.float32),
+                # "steering_speed": gym.spaces.Box(-self.car.max_steering_speed, self.car.max_steering_speed, [1], np.float32),
+                # "acceleration": gym.spaces.Box(self.car.max_deceleration, self.car.max_acceleration, [1], np.float32),
                 # "distance_to_obstacle": gym.spaces.Box(0, max(self.world.width, self.world.height), [4], np.float32),  # Not used yet
             }
         )
