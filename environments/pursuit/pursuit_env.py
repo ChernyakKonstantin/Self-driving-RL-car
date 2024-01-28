@@ -29,6 +29,7 @@ class PursuitEnv(gym.Env):
 
         self.observation_space = gym.spaces.Dict(
             {
+                "tgt_velocity": gym.spaces.Box(self.car.max_speed_rear, self.car.max_speed_forward, [1], np.float32),
                 "tgt_x": gym.spaces.Box(0, self.world.width, [1], np.float32),
                 "tgt_y": gym.spaces.Box(0, self.world.width, [1], np.float32),
                 "x": gym.spaces.Box(0, self.world.width, [1], np.float32),
@@ -37,9 +38,6 @@ class PursuitEnv(gym.Env):
                 "velocity": gym.spaces.Box(self.car.max_speed_rear, self.car.max_speed_forward, [1], np.float32),
                 "steering": gym.spaces.Box(-self.car.max_steering, self.car.max_steering, [1], np.float32),
                 "angular_speed": gym.spaces.Box(*self.car.angular_speed_range, [1], np.float32),
-                # "steering_speed": gym.spaces.Box(-self.car.max_steering_speed, self.car.max_steering_speed, [1], np.float32),
-                # "acceleration": gym.spaces.Box(self.car.max_deceleration, self.car.max_acceleration, [1], np.float32),
-                # "distance_to_obstacle": gym.spaces.Box(0, max(self.world.width, self.world.height), [4], np.float32),  # Not used yet
             }
         )
         # Deceleration / Acceleration and Steering velocity. Both are relative.
@@ -47,11 +45,13 @@ class PursuitEnv(gym.Env):
 
         self.time: float
         self.n_steps: int
+        self.tgt_velocity: float
 
     def get_next_state(self) -> Dict[str, np.ndarray]:
         next_state = {}
         car_state = self.car.get_state()
         tgt_state = self.world.get_state()
+        next_state["tgt_velocity"] = self.tgt_velocity
         next_state.update(car_state)
         next_state.update(tgt_state)
         return next_state
@@ -63,23 +63,22 @@ class PursuitEnv(gym.Env):
             # Agent should avoid collisions.
             reward2 = -10
         elif target_reached:
-            # Agent should stop at the target
-            if self.car.velocity > 0:
-                reward2 = -self.car.velocity / self.car.max_speed_forward
+            reward2 = 30
+            # Agent should reach target with specified `tgt_velocity`
+            velocity_delta = abs(self.tgt_velocity - self.car.velocity)
+            if self.tgt_velocity < 0:
+                reward2 -= velocity_delta / abs(self.car.max_speed_rear)
             else:
-                reward2 = -self.car.velocity / self.car.max_speed_rear
-            reward2 += 30
+                reward2 -= velocity_delta / abs(self.car.max_speed_forward)
         else:
             reward2 = 0
-        # Agent should faster reach target
-        reward3 = -1
-        # # Agent should not spin
-        # if self.car.velocity > 0:
-        #     reward3 = -self.car.centrifugal_force_amplitude() / self.car.max_centrifugal_force_amplitude_forward
-        # elif self.car.velocity < 0:
-        #     reward3 = -self.car.centrifugal_force_amplitude() / self.car.max_centrifugal_force_amplitude_rear
-        # else:
-        #     reward3 = 0
+        # Agent should not spin
+        if self.car.velocity > 0:
+            reward3 = -self.car.centrifugal_force_amplitude() / self.car.max_centrifugal_force_amplitude_forward
+        elif self.car.velocity < 0:
+            reward3 = -self.car.centrifugal_force_amplitude() / self.car.max_centrifugal_force_amplitude_rear
+        else:
+            reward3 = 0
         # Agent should move forward
         reward4 = 0 if self.car.velocity > 0 else -0.1
         # print(f"dist_rew: {reward1}, rew2: {reward2}, spin_rew: {reward3}, speed_rew: {reward4}")
@@ -103,10 +102,11 @@ class PursuitEnv(gym.Env):
         # Added for v3 tuning (maybe its ok to keep for usual training - need to test the idea.)
         if target_reached:
             self.world.reset()
+            self.tgt_velocity = np.random.uniform(self.car.max_speed_rear, self.car.max_speed_forward, size=1,)
 
         next_state = self.get_next_state()
         # terminated = target_reached or collided
-        terminated = False # collided
+        terminated = collided
 
         reward = self.reward_function(collided, target_reached)
 
@@ -132,6 +132,7 @@ class PursuitEnv(gym.Env):
             initial_steering_speed=np.random.uniform(-self.car.max_steering_speed, self.car.max_steering_speed),
             initial_acceleration=np.random.uniform(self.car.max_deceleration, self.car.max_acceleration),
         )
+        self.tgt_velocity = np.random.uniform(self.car.max_speed_rear, self.car.max_speed_forward, size=1,)
         next_state = self.get_next_state()
         return next_state, {}
 
