@@ -40,7 +40,7 @@ class PursuitEnv(gym.Env):
                 "angular_speed": gym.spaces.Box(*self.car.angular_speed_range, [1], np.float32),
             }
         )
-        # Deceleration / Acceleration and Steering velocity. Both are relative.
+        # Deceleration / Acceleration and Desired steering. Both are relative.
         self.action_space = gym.spaces.Box(-1, 1, [2], dtype=np.float32)
 
         self.time: float
@@ -73,9 +73,9 @@ class PursuitEnv(gym.Env):
                 reward2 -= velocity_delta / abs(self.car.max_speed_rear)
             else:
                 reward2 -= velocity_delta / abs(self.car.max_speed_forward)
-            # Another stimule for agent to reach taget as soon as possible
-            distance_penalty = abs(self.path_length - self.minimal_possible_path_length)
-            reward2 -= distance_penalty
+            # # Another stimule for agent to reach taget as soon as possible
+            # distance_penalty = abs(self.path_length - self.minimal_possible_path_length)
+            # reward2 -= distance_penalty
         else:
             reward2 = 0
         # Agent should move forward
@@ -132,7 +132,6 @@ class PursuitEnv(gym.Env):
             initial_orientation=np.random.uniform(-np.pi, np.pi),
             initial_velocity=np.random.uniform(0, self.car.max_speed_forward * 0.5),
             initial_steering=np.random.uniform(-self.car.max_steering, self.car.max_steering),
-            initial_steering_speed=np.random.uniform(-self.car.max_steering_speed, self.car.max_steering_speed),
             initial_acceleration=np.random.uniform(self.car.max_deceleration, self.car.max_acceleration),
         )
         self.tgt_velocity = np.random.uniform(self.car.max_speed_rear, self.car.max_speed_forward, size=1,)
