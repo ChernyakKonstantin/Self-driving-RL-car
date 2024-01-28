@@ -74,8 +74,8 @@ class PursuitEnv(gym.Env):
             else:
                 reward2 -= velocity_delta / abs(self.car.max_speed_forward)
             # # Another stimule for agent to reach taget as soon as possible
-            # distance_penalty = abs(self.path_length - self.minimal_possible_path_length)
-            # reward2 -= distance_penalty
+            distance_penalty = abs(self.path_length - self.minimal_possible_path_length)
+            reward2 -= distance_penalty
         else:
             reward2 = 0
         # Agent should move forward
@@ -108,7 +108,7 @@ class PursuitEnv(gym.Env):
         terminated = collided
 
         dist_to_target = self.world.get_distance_to_target(self.car.x, self.car.y)
-        self.path_length += dist_to_target - self.previous_dist_to_target
+        self.path_length += abs(dist_to_target - self.previous_dist_to_target) # rough approximation
         reward = self.reward_function(collided, target_reached, dist_to_target)
 
         self.previous_dist_to_target = dist_to_target
