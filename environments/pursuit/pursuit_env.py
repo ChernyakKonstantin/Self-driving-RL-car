@@ -47,6 +47,8 @@ class PursuitEnv(gym.Env):
         self.n_steps: int
         self.tgt_velocity: float
         self.previous_dist_to_target: float
+        self.path_length: float
+        self.minimal_possible_path_length: float
 
     def get_next_state(self) -> Dict[str, np.ndarray]:
         next_state = {}
@@ -71,6 +73,9 @@ class PursuitEnv(gym.Env):
                 reward2 -= velocity_delta / abs(self.car.max_speed_rear)
             else:
                 reward2 -= velocity_delta / abs(self.car.max_speed_forward)
+            # Another stimule for agent to reach taget as soon as possible
+            distance_penalty = abs(self.path_length - self.minimal_possible_path_length)
+            reward2 -= distance_penalty
         else:
             reward2 = 0
         # Agent should move forward
@@ -103,7 +108,7 @@ class PursuitEnv(gym.Env):
         terminated = collided
 
         dist_to_target = self.world.get_distance_to_target(self.car.x, self.car.y)
-
+        self.path_length += dist_to_target - self.previous_dist_to_target
         reward = self.reward_function(collided, target_reached, dist_to_target)
 
         self.previous_dist_to_target = dist_to_target
@@ -133,6 +138,8 @@ class PursuitEnv(gym.Env):
         self.tgt_velocity = np.random.uniform(self.car.max_speed_rear, self.car.max_speed_forward, size=1,)
         next_state = self.get_next_state()
         self.previous_dist_to_target = self.world.get_distance_to_target(self.car.x, self.car.y)
+        self.path_length = 0.0
+        self.minimal_possible_path_length = self.world.get_distance_to_target(self.car.x, self.car.y)
         return next_state, {}
 
     def render(self):
